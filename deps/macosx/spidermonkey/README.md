@@ -14,7 +14,7 @@ cd build_OPT.OBJ
 # --disable-shared-js
 
 # For debug build
-../configure --disable-tests --enable-llvm-hacks --without-intl-api
+../configure --disable-tests --enable-llvm-hacks --without-intl-api --enable-debug
 
 # For release build
 ../configure --disable-tests --enable-release --disable-debug --enable-strip --enable-install-strip --enable-optimize=-O3 --enable-llvm-hacks --without-intl-api
