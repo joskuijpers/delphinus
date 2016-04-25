@@ -42,6 +42,7 @@
 			isa = PBXGroup;
 			children = (
 				800BC33B1CCE229C00C74F2C /* Delphinus */,
+				800BC3451CCE272200C74F2C /* Dependencies */,
 				800BC33A1CCE229C00C74F2C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -59,7 +60,16 @@
 			children = (
 				800BC33C1CCE229C00C74F2C /* main.cpp */,
 			);
-			path = Delphinus;
+			name = Delphinus;
+			path = ../delphinus/src;
+			sourceTree = "<group>";
+		};
+		800BC3451CCE272200C74F2C /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Dependencies;
+			path = ../delphinus/deps;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -239,6 +249,7 @@
 				800BC3421CCE229C00C74F2C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
