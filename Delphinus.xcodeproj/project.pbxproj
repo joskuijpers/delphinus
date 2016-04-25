@@ -8,23 +8,64 @@
 
 /* Begin PBXBuildFile section */
 		800BC33D1CCE229C00C74F2C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC33C1CCE229C00C74F2C /* main.cpp */; };
+		800BC3601CCE32FB00C74F2C /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35C1CCE32FB00C74F2C /* SDL2_image.framework */; };
+		800BC3611CCE32FB00C74F2C /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35D1CCE32FB00C74F2C /* SDL2_mixer.framework */; };
+		800BC3621CCE32FB00C74F2C /* SDL2_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35E1CCE32FB00C74F2C /* SDL2_net.framework */; };
+		800BC3631CCE32FB00C74F2C /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35F1CCE32FB00C74F2C /* SDL2_ttf.framework */; };
+		800BC3651CCE334E00C74F2C /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC3641CCE334E00C74F2C /* SDL2.framework */; };
+		800BC39A1CCE36AC00C74F2C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC33C1CCE229C00C74F2C /* main.cpp */; };
+		800BC3C71CCE380B00C74F2C /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC3641CCE334E00C74F2C /* SDL2.framework */; };
+		800BC3C81CCE380B00C74F2C /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC3641CCE334E00C74F2C /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		800BC3C91CCE380B00C74F2C /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35C1CCE32FB00C74F2C /* SDL2_image.framework */; };
+		800BC3CA1CCE380B00C74F2C /* SDL2_image.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35C1CCE32FB00C74F2C /* SDL2_image.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		800BC3CB1CCE380B00C74F2C /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35D1CCE32FB00C74F2C /* SDL2_mixer.framework */; };
+		800BC3CC1CCE380B00C74F2C /* SDL2_mixer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35D1CCE32FB00C74F2C /* SDL2_mixer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		800BC3CD1CCE380B00C74F2C /* SDL2_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35E1CCE32FB00C74F2C /* SDL2_net.framework */; };
+		800BC3CE1CCE380B00C74F2C /* SDL2_net.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35E1CCE32FB00C74F2C /* SDL2_net.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		800BC3CF1CCE380B00C74F2C /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35F1CCE32FB00C74F2C /* SDL2_ttf.framework */; };
+		800BC3D01CCE380B00C74F2C /* SDL2_ttf.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC35F1CCE32FB00C74F2C /* SDL2_ttf.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		800BC3371CCE229C00C74F2C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			dstPath = usr/share/man/man1;
+			dstSubfolderSpec = 10;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
+		};
+		800BC3D11CCE380B00C74F2C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				800BC3CC1CCE380B00C74F2C /* SDL2_mixer.framework in Embed Frameworks */,
+				800BC3CE1CCE380B00C74F2C /* SDL2_net.framework in Embed Frameworks */,
+				800BC3C81CCE380B00C74F2C /* SDL2.framework in Embed Frameworks */,
+				800BC3CA1CCE380B00C74F2C /* SDL2_image.framework in Embed Frameworks */,
+				800BC3D01CCE380B00C74F2C /* SDL2_ttf.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		800BC3391CCE229C00C74F2C /* Delphinus */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Delphinus; sourceTree = BUILT_PRODUCTS_DIR; };
 		800BC33C1CCE229C00C74F2C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		800BC35B1CCE2C7100C74F2C /* cleanup.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cleanup.hpp; sourceTree = "<group>"; };
+		800BC35C1CCE32FB00C74F2C /* SDL2_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_image.framework; sourceTree = "<group>"; };
+		800BC35D1CCE32FB00C74F2C /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_mixer.framework; sourceTree = "<group>"; };
+		800BC35E1CCE32FB00C74F2C /* SDL2_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_net.framework; sourceTree = "<group>"; };
+		800BC35F1CCE32FB00C74F2C /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2_ttf.framework; sourceTree = "<group>"; };
+		800BC3641CCE334E00C74F2C /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SDL2.framework; sourceTree = "<group>"; };
+		800BC3891CCE362900C74F2C /* DelphinusApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DelphinusApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		800BC3BC1CCE370B00C74F2C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		800BC3BF1CCE370B00C74F2C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		800BC3C11CCE370B00C74F2C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +73,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				800BC3651CCE334E00C74F2C /* SDL2.framework in Frameworks */,
+				800BC3611CCE32FB00C74F2C /* SDL2_mixer.framework in Frameworks */,
+				800BC3621CCE32FB00C74F2C /* SDL2_net.framework in Frameworks */,
+				800BC3601CCE32FB00C74F2C /* SDL2_image.framework in Frameworks */,
+				800BC3631CCE32FB00C74F2C /* SDL2_ttf.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		800BC3861CCE362900C74F2C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				800BC3C71CCE380B00C74F2C /* SDL2.framework in Frameworks */,
+				800BC3CB1CCE380B00C74F2C /* SDL2_mixer.framework in Frameworks */,
+				800BC3CD1CCE380B00C74F2C /* SDL2_net.framework in Frameworks */,
+				800BC3C91CCE380B00C74F2C /* SDL2_image.framework in Frameworks */,
+				800BC3CF1CCE380B00C74F2C /* SDL2_ttf.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,7 +99,8 @@
 		800BC3301CCE229C00C74F2C = {
 			isa = PBXGroup;
 			children = (
-				800BC33B1CCE229C00C74F2C /* Delphinus */,
+				800BC33B1CCE229C00C74F2C /* Source */,
+				800BC3C61CCE378400C74F2C /* Resources */,
 				800BC3451CCE272200C74F2C /* Dependencies */,
 				800BC33A1CCE229C00C74F2C /* Products */,
 			);
@@ -51,26 +110,52 @@
 			isa = PBXGroup;
 			children = (
 				800BC3391CCE229C00C74F2C /* Delphinus */,
+				800BC3891CCE362900C74F2C /* DelphinusApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		800BC33B1CCE229C00C74F2C /* Delphinus */ = {
+		800BC33B1CCE229C00C74F2C /* Source */ = {
 			isa = PBXGroup;
 			children = (
 				800BC33C1CCE229C00C74F2C /* main.cpp */,
+				800BC35B1CCE2C7100C74F2C /* cleanup.hpp */,
 			);
-			name = Delphinus;
+			name = Source;
 			path = ../delphinus/src;
 			sourceTree = "<group>";
 		};
 		800BC3451CCE272200C74F2C /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
+				800BC3641CCE334E00C74F2C /* SDL2.framework */,
+				800BC35C1CCE32FB00C74F2C /* SDL2_image.framework */,
+				800BC35D1CCE32FB00C74F2C /* SDL2_mixer.framework */,
+				800BC35E1CCE32FB00C74F2C /* SDL2_net.framework */,
+				800BC35F1CCE32FB00C74F2C /* SDL2_ttf.framework */,
 			);
 			name = Dependencies;
 			path = ../delphinus/deps;
 			sourceTree = "<group>";
+		};
+		800BC3C51CCE373D00C74F2C /* macosx */ = {
+			isa = PBXGroup;
+			children = (
+				800BC3C11CCE370B00C74F2C /* Info.plist */,
+				800BC3BC1CCE370B00C74F2C /* Assets.xcassets */,
+				800BC3BE1CCE370B00C74F2C /* MainMenu.xib */,
+			);
+			path = macosx;
+			sourceTree = "<group>";
+		};
+		800BC3C61CCE378400C74F2C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				800BC3C51CCE373D00C74F2C /* macosx */,
+			);
+			name = Resources;
+			path = ../delphinus/res;
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -92,6 +177,24 @@
 			productReference = 800BC3391CCE229C00C74F2C /* Delphinus */;
 			productType = "com.apple.product-type.tool";
 		};
+		800BC3881CCE362900C74F2C /* DelphinusApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 800BC3971CCE362900C74F2C /* Build configuration list for PBXNativeTarget "DelphinusApp" */;
+			buildPhases = (
+				800BC3851CCE362900C74F2C /* Sources */,
+				800BC3861CCE362900C74F2C /* Frameworks */,
+				800BC3871CCE362900C74F2C /* Resources */,
+				800BC3D11CCE380B00C74F2C /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DelphinusApp;
+			productName = DelphinusApp;
+			productReference = 800BC3891CCE362900C74F2C /* DelphinusApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -104,6 +207,9 @@
 					800BC3381CCE229C00C74F2C = {
 						CreatedOnToolsVersion = 7.3;
 					};
+					800BC3881CCE362900C74F2C = {
+						CreatedOnToolsVersion = 7.3;
+					};
 				};
 			};
 			buildConfigurationList = 800BC3341CCE229C00C74F2C /* Build configuration list for PBXProject "Delphinus" */;
@@ -112,6 +218,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 800BC3301CCE229C00C74F2C;
 			productRefGroup = 800BC33A1CCE229C00C74F2C /* Products */;
@@ -119,9 +226,20 @@
 			projectRoot = "";
 			targets = (
 				800BC3381CCE229C00C74F2C /* Delphinus */,
+				800BC3881CCE362900C74F2C /* DelphinusApp */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		800BC3871CCE362900C74F2C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		800BC3351CCE229C00C74F2C /* Sources */ = {
@@ -132,7 +250,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		800BC3851CCE362900C74F2C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				800BC39A1CCE36AC00C74F2C /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		800BC3BE1CCE370B00C74F2C /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				800BC3BF1CCE370B00C74F2C /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		800BC33E1CCE229C00C74F2C /* Debug */ = {
@@ -219,6 +356,7 @@
 		800BC3411CCE229C00C74F2C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/deps";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -226,6 +364,39 @@
 		800BC3421CCE229C00C74F2C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/deps";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		800BC3981CCE362900C74F2C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/deps";
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/../delphinus/res/macosx/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.jarvix.DelphinusApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		800BC3991CCE362900C74F2C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/deps";
+				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/../delphinus/res/macosx/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.jarvix.DelphinusApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -250,6 +421,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		800BC3971CCE362900C74F2C /* Build configuration list for PBXNativeTarget "DelphinusApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				800BC3981CCE362900C74F2C /* Debug */,
+				800BC3991CCE362900C74F2C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
