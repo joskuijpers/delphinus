@@ -32,13 +32,10 @@
 		800BC3E61CCE6EFD00C74F2C /* libmozjs-45.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 800BC3E31CCE6CB100C74F2C /* libmozjs-45.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		800BC3ED1CCEBC3000C74F2C /* engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC3EB1CCEBC3000C74F2C /* engine.cpp */; };
 		800BC3EE1CCEBC3000C74F2C /* engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC3EB1CCEBC3000C74F2C /* engine.cpp */; };
-		800BC3F11CCEBC3F00C74F2C /* console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC3EF1CCEBC3F00C74F2C /* console.cpp */; };
-		800BC3F21CCEBC3F00C74F2C /* console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC3EF1CCEBC3F00C74F2C /* console.cpp */; };
-		800BC3F51CCEBC8000C74F2C /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC3F31CCEBC8000C74F2C /* debug.cpp */; };
-		800BC3F61CCEBC8000C74F2C /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC3F31CCEBC8000C74F2C /* debug.cpp */; };
 		800BC3F91CCFF51A00C74F2C /* assert.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC3F81CCFF51A00C74F2C /* assert.js */; };
 		800BC3FB1CD01CD000C74F2C /* util.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC3FA1CD01CD000C74F2C /* util.js */; };
 		800BC3FD1CD6317900C74F2C /* random.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC3FC1CD6317900C74F2C /* random.js */; };
+		800BC3FF1CD63BCC00C74F2C /* console.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC3FE1CD63BCC00C74F2C /* console.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -98,14 +95,11 @@
 		800BC3E81CCE91E300C74F2C /* Promise.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Promise.js; sourceTree = "<group>"; };
 		800BC3EB1CCEBC3000C74F2C /* engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = engine.cpp; sourceTree = "<group>"; };
 		800BC3EC1CCEBC3000C74F2C /* engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = engine.hpp; sourceTree = "<group>"; };
-		800BC3EF1CCEBC3F00C74F2C /* console.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = console.cpp; sourceTree = "<group>"; };
-		800BC3F01CCEBC3F00C74F2C /* console.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = console.hpp; sourceTree = "<group>"; };
-		800BC3F31CCEBC8000C74F2C /* debug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug.cpp; sourceTree = "<group>"; };
-		800BC3F41CCEBC8000C74F2C /* debug.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		800BC3F71CCFC17900C74F2C /* async.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = async.js; sourceTree = "<group>"; };
 		800BC3F81CCFF51A00C74F2C /* assert.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = assert.js; sourceTree = "<group>"; };
 		800BC3FA1CD01CD000C74F2C /* util.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = util.js; sourceTree = "<group>"; };
 		800BC3FC1CD6317900C74F2C /* random.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = random.js; sourceTree = "<group>"; };
+		800BC3FE1CD63BCC00C74F2C /* console.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = console.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,10 +222,6 @@
 			children = (
 				800BC3EB1CCEBC3000C74F2C /* engine.cpp */,
 				800BC3EC1CCEBC3000C74F2C /* engine.hpp */,
-				800BC3EF1CCEBC3F00C74F2C /* console.cpp */,
-				800BC3F01CCEBC3F00C74F2C /* console.hpp */,
-				800BC3F31CCEBC8000C74F2C /* debug.cpp */,
-				800BC3F41CCEBC8000C74F2C /* debug.hpp */,
 			);
 			name = Native;
 			path = src/lib_native;
@@ -245,6 +235,7 @@
 				800BC3F81CCFF51A00C74F2C /* assert.js */,
 				800BC3FA1CD01CD000C74F2C /* util.js */,
 				800BC3FC1CD6317900C74F2C /* random.js */,
+				800BC3FE1CD63BCC00C74F2C /* console.js */,
 			);
 			name = JavaScript;
 			path = lib;
@@ -330,6 +321,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				800BC3FF1CD63BCC00C74F2C /* console.js in Resources */,
 				800BC3FB1CD01CD000C74F2C /* util.js in Resources */,
 				800BC3FD1CD6317900C74F2C /* random.js in Resources */,
 				800BC3F91CCFF51A00C74F2C /* assert.js in Resources */,
@@ -343,8 +335,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				800BC3F11CCEBC3F00C74F2C /* console.cpp in Sources */,
-				800BC3F51CCEBC8000C74F2C /* debug.cpp in Sources */,
 				800BC33D1CCE229C00C74F2C /* main.cpp in Sources */,
 				800BC3ED1CCEBC3000C74F2C /* engine.cpp in Sources */,
 			);
@@ -354,8 +344,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				800BC3F21CCEBC3F00C74F2C /* console.cpp in Sources */,
-				800BC3F61CCEBC8000C74F2C /* debug.cpp in Sources */,
 				800BC39A1CCE36AC00C74F2C /* main.cpp in Sources */,
 				800BC3EE1CCEBC3000C74F2C /* engine.cpp in Sources */,
 			);

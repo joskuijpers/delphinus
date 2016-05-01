@@ -10,4 +10,4 @@
 
 // apiLevel, name, versions, mainModule, extensions,
 // abort(), exit(), restart()
-// assert()
+// _print() // console print
