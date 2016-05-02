@@ -10,11 +10,11 @@
 #include "macros.hpp"
 #include "runtime.hpp"
 #include "util.hpp"
+#include "console_api.hpp"
 
 #include <cassert>
 
 #include <SDL2/SDL_filesystem.h>
-
 #include <js/Conversions.h>
 
 bool api_require(JSContext *context, uint argc, JS::Value *vp);
@@ -56,6 +56,25 @@ std::string delphinus::Module::getScriptPath() {
     return _directory + "/" + _filename;
 }
 
+bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleScope) {
+    // Add std classes
+    if (!JS_InitStandardClasses(context, moduleScope)) {
+        LOG("Could not create standard classes");
+        return false;
+    }
+
+    // Add console object
+    if (!delphinus::api::console_addToScope(context, moduleScope)) {
+        LOG("Failed to add console to module scope");
+        return false;
+    }
+
+
+    // Add __delphinus object
+
+    return true;
+}
+
 bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     JSContext *context = runtime->context;
 
@@ -77,14 +96,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
 
     JSAutoCompartment ac(context, moduleScope);
 
-    // Add std classes
-    if (!JS_InitStandardClasses(context, moduleScope)) {
-        LOG("Could not create standard classes");
-        return false;
-    }
-
-    // Add console object
-    // Add __delphinus object
+    addGlobals(context, moduleScope);
 
     // Add __dirname and __filename properties
     JS::RootedString __dirname(context, JS_NewStringCopyZ(context, _directory.c_str()));
@@ -144,8 +156,9 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
 
     // Create the Module class and prototype
     JS::RootedObject moduleObjectProto(context, JS_InitClass(context, moduleScope, nullptr, &moduleClass, ModuleObject, 0, nullptr, nullptr, nullptr, nullptr));
-    if (!moduleObjectProto)
-    FATAL("Could not create Module prototype");
+    if (!moduleObjectProto) {
+        FATAL("Could not create Module prototype");
+    }
 
     // Create a new module object
     JS::RootedObject moduleObj(context, JS_NewObjectWithGivenProto(context, &moduleClass, moduleObjectProto));
@@ -250,8 +263,7 @@ bool api_require(JSContext *context, uint argc, JS::Value *vp) {
     LOG("require('%s') called. Resolved to %s", moduleId.c_str(), path.c_str());
 
     // Get the runtime
-    JSRuntime *jsRuntime = JS_GetRuntime(context);
-    delphinus::Runtime *runtime = (delphinus::Runtime *)JS_GetRuntimePrivate(jsRuntime);
+    delphinus::Runtime *runtime = delphinus::Runtime::getCurrent(context);
 
     // Create the module
     // TODO; actually get it from cache

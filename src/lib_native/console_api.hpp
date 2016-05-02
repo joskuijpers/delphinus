@@ -14,16 +14,8 @@
 namespace delphinus {
 namespace api {
 
-class Console {
-    JSClass _class;
+bool console_addToScope(JSContext *context, JS::HandleObject scope);
 
-public:
-    Console();
-    ~Console();
-
-//    bool construct(JSContext *context, uint argc, JSValue *vp);
-//    void finalize(JSContext *context, JSObject *object);
-};
 
 }
 }

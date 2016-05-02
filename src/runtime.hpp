@@ -23,6 +23,8 @@ public:
     ~Runtime();
 
     void run();
+
+    static Runtime *getCurrent(JSContext *context);
 };
 
 }

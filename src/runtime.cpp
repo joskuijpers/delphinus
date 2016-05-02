@@ -45,6 +45,10 @@ delphinus::Runtime::~Runtime() {
     JS_ShutDown();
 }
 
+delphinus::Runtime *delphinus::Runtime::getCurrent(JSContext *context) {
+    return (delphinus::Runtime *)JS_GetRuntimePrivate(JS_GetRuntime(context));
+}
+
 void delphinus::Runtime::run() {
     // Load main module
     Module *mainModule = new Module(this, "main", std::string(SDL_GetBasePath()) + "main.js");
