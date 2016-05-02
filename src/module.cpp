@@ -19,8 +19,6 @@
 #include <SDL2/SDL_filesystem.h>
 #include <js/Conversions.h>
 
-#define JSPROP_ENREPE (JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
-
 bool api_require(JSContext *context, uint argc, JS::Value *vp);
 bool api_resolve(JSContext *context, uint argc, JS::Value *vp);
 
@@ -119,7 +117,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     DPH_JS_STRING(__dirname, _directory.c_str())
     if(!JS_DefineProperty(context, moduleScope,
                           "__dirname", __dirname,
-                          JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+                          JSPROP_ENREPE)) {
         LOG("Failed to add __dirname property to module scope");
         return false;
     }
@@ -127,7 +125,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     DPH_JS_STRING(__filename, _filename.c_str());
     if (!JS_DefineProperty(context, moduleScope,
                            "__filename", __filename,
-                           JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+                           JSPROP_ENREPE)) {
         LOG("Failed to add __filename property to module scope");
         return false;
     }

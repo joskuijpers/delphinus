@@ -21,3 +21,4 @@
 #define FATAL(format, ...) { fprintf(stderr, format "\n", ##__VA_ARGS__); exit(1); }
 
 #define DPH_JS_STRING(name, value) JS::RootedString name(context, JS_NewStringCopyZ(context, value));
+#define JSPROP_ENREPE (JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)

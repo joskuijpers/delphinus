@@ -95,7 +95,7 @@ bool delphinus::api::console_addToScope(JSContext *context, JS::HandleObject sco
     }
 
     // Add console to the scope
-    if (!JS_DefineProperty(context, scope, "console", console, JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+    if (!JS_DefineProperty(context, scope, "console", console, JSPROP_ENREPE)) {
         return false;
     }
 

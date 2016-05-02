@@ -60,7 +60,7 @@ bool delphinus::api::vm_addToScope(JSContext *context, JS::HandleObject scope) {
     }
 
     // Add console to the scope
-    if (!JS_DefineProperty(context, scope, "__delphinus", vm, JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+    if (!JS_DefineProperty(context, scope, "__delphinus", vm, JSPROP_ENREPE)) {
         return false;
     }
 
