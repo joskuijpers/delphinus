@@ -2,15 +2,14 @@
 //  cleanup.hpp
 //  Delphinus
 //
-//  Created by Jos Kuijpers on 25/04/16.
+//  Created by Jos Kuijpers on 01/05/16.
 //  Copyright © 2016 Jarvix. All rights reserved.
 //
 
-#ifndef cleanup_h
-#define cleanup_h
+#pragma once
 
 #include <utility>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 /*
  * Recurse through the list of arguments to clean up, cleaning up
@@ -34,35 +33,33 @@ void cleanup(T *t, Args&&... args){
  * but rather just want to clean everything up and let cleanup sort it out
  */
 template<>
-inline void cleanup<SDL_Window>(SDL_Window *win){
-    if (!win){
+inline void cleanup<SDL_Window>(SDL_Window *window){
+    if (!window) {
         return;
     }
-    SDL_DestroyWindow(win);
+    SDL_DestroyWindow(window);
 }
 
 template<>
-inline void cleanup<SDL_Renderer>(SDL_Renderer *ren){
-    if (!ren){
+inline void cleanup<SDL_Renderer>(SDL_Renderer *renderer){
+    if (!renderer) {
         return;
     }
-    SDL_DestroyRenderer(ren);
+    SDL_DestroyRenderer(renderer);
 }
 
 template<>
-inline void cleanup<SDL_Texture>(SDL_Texture *tex){
-    if (!tex){
+inline void cleanup<SDL_Texture>(SDL_Texture *texture){
+    if (!texture) {
         return;
     }
-    SDL_DestroyTexture(tex);
+    SDL_DestroyTexture(texture);
 }
 
 template<>
-inline void cleanup<SDL_Surface>(SDL_Surface *surf){
-    if (!surf){
+inline void cleanup<SDL_Surface>(SDL_Surface *surface){
+    if (!surface) {
         return;
     }
-    SDL_FreeSurface(surf);
+    SDL_FreeSurface(surface);
 }
-
-#endif /* cleanup_h */
