@@ -11,6 +11,7 @@
 #include "runtime.hpp"
 #include "util.hpp"
 #include "console_api.hpp"
+#include "vm_api.hpp"
 
 #include <cassert>
 #include <forward_list>
@@ -82,8 +83,11 @@ bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleSc
         return false;
     }
 
-
     // Add __delphinus object
+    if (!delphinus::api::vm_addToScope(context, moduleScope)) {
+        LOG("Failed to add __delphinus to module scope");
+        return false;
+    }
 
     return true;
 }
@@ -112,7 +116,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     addGlobals(context, moduleScope);
 
     // Add __dirname and __filename properties
-    JS::RootedString __dirname(context, JS_NewStringCopyZ(context, _directory.c_str()));
+    DPH_JS_STRING(__dirname, _directory.c_str())
     if(!JS_DefineProperty(context, moduleScope,
                           "__dirname", __dirname,
                           JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
@@ -120,7 +124,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
         return false;
     }
 
-    JS::RootedString __filename(context, JS_NewStringCopyZ(context, _filename.c_str()));
+    DPH_JS_STRING(__filename, _filename.c_str());
     if (!JS_DefineProperty(context, moduleScope,
                            "__filename", __filename,
                            JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
@@ -183,7 +187,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     }
 
     // Add 'module.id'
-    JS::RootedString moduleId(context, JS_NewStringCopyZ(context, name.c_str()));
+    DPH_JS_STRING(moduleId, name.c_str());
     if (!JS_DefineProperty(context, moduleObj,
                            "id", moduleId,
                            JSPROP_ENREPE)) {

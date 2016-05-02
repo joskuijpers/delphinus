@@ -7,3 +7,15 @@
 //
 
 #pragma once
+
+#include <jsapi.h>
+#include "types.hpp"
+
+namespace delphinus {
+namespace api {
+
+    bool vm_addToScope(JSContext *context, JS::HandleObject scope);
+
+}
+}
+

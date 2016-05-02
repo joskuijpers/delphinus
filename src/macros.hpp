@@ -10,6 +10,7 @@
 
 #include "config.hpp"
 #include <stdio.h>
+#include <jsapi.h>
 
 #ifdef DEBUG
 # define LOG(format, ...) fprintf(stderr, format "\n", ##__VA_ARGS__);
@@ -18,3 +19,5 @@
 #endif
 
 #define FATAL(format, ...) { fprintf(stderr, format "\n", ##__VA_ARGS__); exit(1); }
+
+#define DPH_JS_STRING(name, value) JS::RootedString name(context, JS_NewStringCopyZ(context, value));
