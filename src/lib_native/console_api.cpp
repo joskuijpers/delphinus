@@ -20,11 +20,55 @@
 #include <cstdio>
 #include <string>
 
-bool api_new_console(JSContext *context, uint argc, JS::Value *vp);
-bool api_console_log(JSContext *context, uint argc, JS::Value *vp);
+bool api_new_console(JSContext *context, uint argc, JS::Value *vp) {
+    return true;
+}
+
+bool api_console_print(JSContext *context, uint argc, JS::Value *vp, const char *prefix) {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
+    // Concatenate all arguments
+    std::string result = "";
+    for(uint i = 0; i < args.length(); ++i) {
+        JS::RootedString jsString(context, args.get(i).toString());
+
+        char *moduleName = JS_EncodeStringToUTF8(context, jsString);
+        if(moduleName) {
+            result.append(" ");
+            result.append(moduleName);
+
+            JS_free(context, moduleName);
+        }
+    }
+
+    printf("[CONSOLE: %s] %s\n", prefix, result.c_str());
+    
+    return true;
+}
+
+bool api_console_log(JSContext *context, uint argc, JS::Value *vp) {
+    return api_console_print(context, argc, vp, "  LOG");
+}
+
+bool api_console_warn(JSContext *context, uint argc, JS::Value *vp) {
+    return api_console_print(context, argc, vp, " WARN");
+}
+
+bool api_console_error(JSContext *context, uint argc, JS::Value *vp) {
+    return api_console_print(context, argc, vp, "ERROR");
+}
+
+// .dir
+// .trace
+// .group
+// .unGroup
+// .time
+// .timeEnd
 
 static const JSFunctionSpec consoleFunctions[] = {
     JS_FS("log", api_console_log, 1, 0),
+    JS_FS("warn", api_console_warn, 1, 0),
+    JS_FS("error", api_console_error, 1, 0),
     JS_FS_END
 };
 
@@ -57,39 +101,3 @@ bool delphinus::api::console_addToScope(JSContext *context, JS::HandleObject sco
 
     return true;
 }
-
-bool api_new_console(JSContext *context, uint argc, JS::Value *vp) {
-    return true;
-}
-
-bool api_console_log(JSContext *context, uint argc, JS::Value *vp) {
-    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-
-    // Concatenate all arguments
-    std::string result = "";
-    for(uint i = 0; i < args.length(); ++i) {
-        JS::RootedString jsString(context, args.get(i).toString());
-
-        char *moduleName = JS_EncodeStringToUTF8(context, jsString);
-        if(moduleName) {
-            result.append(" ");
-            result.append(moduleName);
-
-            JS_free(context, moduleName);
-        }
-    }
-
-    printf("[CONSOLE] %s\n", result.c_str());
-
-    return true;
-}
-
-// .log
-// .error
-// .warn
-// .dir
-// .trace
-// .group
-// .unGroup
-// .time
-// .timeEnd
