@@ -1,5 +1,4 @@
 
-var x = 10;
-require('lala ' + x + " y:" + y);
-
-console.log("ANother world!");
+exports.foo = function(a, b) {
+    return a + b * 2;
+};

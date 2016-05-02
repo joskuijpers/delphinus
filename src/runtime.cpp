@@ -13,6 +13,8 @@
 #include <jsapi.h>
 #include <js/Initialization.h>
 
+#include <SDL2/SDL_filesystem.h>
+
 /// Error reporting callback for SpiderMonkey.
 static void reportError(JSContext *cx, const char *message, JSErrorReport *report);
 
@@ -27,6 +29,9 @@ delphinus::Runtime::Runtime() {
 
     JS_SetErrorReporter(runtime, reportError);
 
+    // Can do without management. JS runtime quits before Runtime is deallocated
+    JS_SetRuntimePrivate(runtime, (void *)this);
+
     // Create a context
     context = JS_NewContext(runtime, 8192);
     if (context == nullptr)
@@ -34,7 +39,7 @@ delphinus::Runtime::Runtime() {
 }
 
 delphinus::Runtime::~Runtime() {
-    JS_DestroyContext(context);
+    JS_DestroyContextNoGC(context);
     JS_DestroyRuntime(runtime);
 
     JS_ShutDown();
@@ -42,9 +47,9 @@ delphinus::Runtime::~Runtime() {
 
 void delphinus::Runtime::run() {
     // Load main module
-    Module *mainModule = new Module(this, "examples/simple", "main.js");
+    Module *mainModule = new Module(this, "main", std::string(SDL_GetBasePath()) + "main.js");
 
-    mainModule->run(this);
+    mainModule->loadIntoRuntime(this);
 }
 
 static void reportError(JSContext *cx, const char *message, JSErrorReport *report) {

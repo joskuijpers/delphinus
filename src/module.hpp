@@ -17,7 +17,7 @@ namespace delphinus {
     class Runtime;
 
 class Module {
-    const char *name;
+    std::string name;
 
     JS::Heap<JSObject *> exports;
     JS::Heap<JSObject *> scope;
@@ -27,13 +27,13 @@ class Module {
     std::string _directory;
 
 public:
-    Module(Runtime *runtime, const std::string &directory, const std::string &scriptName);
-    ~Module();
+    Module(Runtime *runtime, std::string moduleId, std::string path);
 
-    bool run(Runtime *runtime);
+    bool loadIntoRuntime(Runtime *runtime);
 
-    static void module_trace_func(JSTracer *tracer, void *data);
+    JSObject *getExports(JSContext *context);
 private:
+    static void module_trace_func(JSTracer *tracer, void *data);
     std::string getScriptPath();
 };
     

@@ -45,6 +45,10 @@
 		800BC4201CD75E3C00C74F2C /* console_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41E1CD75E3C00C74F2C /* console_api.cpp */; };
 		800BC4211CD75E3C00C74F2C /* console_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41E1CD75E3C00C74F2C /* console_api.cpp */; };
 		800BC4271CD77AD700C74F2C /* main.js in Copy Example code */ = {isa = PBXBuildFile; fileRef = 800BC4261CD77AC400C74F2C /* main.js */; };
+		8048E4AF1CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
+		8048E4B01CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
+		808966EB1CD7C2210099FF06 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 808966E91CD7C2210099FF06 /* util.cpp */; };
+		808966EC1CD7C2210099FF06 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 808966E91CD7C2210099FF06 /* util.cpp */; };
 		80FD9A511CD7B52700D27F9D /* test.js in Copy Example code */ = {isa = PBXBuildFile; fileRef = 80FD9A501CD7B52600D27F9D /* test.js */; };
 /* End PBXBuildFile section */
 
@@ -88,7 +92,7 @@
 		800BC4221CD77A8F00C74F2C /* Copy Example code */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = examples/simple;
+			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
 				800BC4271CD77AD700C74F2C /* main.js in Copy Example code */,
@@ -135,6 +139,10 @@
 		800BC41E1CD75E3C00C74F2C /* console_api.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = console_api.cpp; sourceTree = "<group>"; };
 		800BC41F1CD75E3C00C74F2C /* console_api.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = console_api.hpp; sourceTree = "<group>"; };
 		800BC4261CD77AC400C74F2C /* main.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = main.js; sourceTree = "<group>"; };
+		8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spherefs.cpp; sourceTree = "<group>"; };
+		8048E4AE1CD7CD1B00676C4F /* spherefs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = spherefs.hpp; sourceTree = "<group>"; };
+		808966E91CD7C2210099FF06 /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
+		808966EA1CD7C2210099FF06 /* util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = util.hpp; sourceTree = "<group>"; };
 		80FD9A501CD7B52600D27F9D /* test.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = test.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -198,6 +206,8 @@
 				800BC4011CD6458500C74F2C /* engine.hpp */,
 				800BC4041CD652E100C74F2C /* window.cpp */,
 				800BC4051CD652E100C74F2C /* window.hpp */,
+				8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */,
+				8048E4AE1CD7CD1B00676C4F /* spherefs.hpp */,
 				80FD9A4F1CD7B1E200D27F9D /* JS */,
 				800BC40B1CD658F300C74F2C /* Tools */,
 			);
@@ -291,6 +301,8 @@
 				800BC4081CD6587D00C74F2C /* types.hpp */,
 				800BC40A1CD658E100C74F2C /* macros.hpp */,
 				800BC4091CD658D300C74F2C /* config.hpp */,
+				808966E91CD7C2210099FF06 /* util.cpp */,
+				808966EA1CD7C2210099FF06 /* util.hpp */,
 			);
 			name = Tools;
 			sourceTree = "<group>";
@@ -421,8 +433,10 @@
 			files = (
 				800BC4201CD75E3C00C74F2C /* console_api.cpp in Sources */,
 				800BC4121CD667BD00C74F2C /* module.cpp in Sources */,
+				808966EB1CD7C2210099FF06 /* util.cpp in Sources */,
 				800BC41C1CD75A8900C74F2C /* vm_api.cpp in Sources */,
 				800BC4021CD6458500C74F2C /* engine.cpp in Sources */,
+				8048E4AF1CD7CD1B00676C4F /* spherefs.cpp in Sources */,
 				800BC40E1CD6679E00C74F2C /* runtime.cpp in Sources */,
 				800BC4061CD652E100C74F2C /* window.cpp in Sources */,
 			);
@@ -434,8 +448,10 @@
 			files = (
 				800BC4211CD75E3C00C74F2C /* console_api.cpp in Sources */,
 				800BC4131CD667BD00C74F2C /* module.cpp in Sources */,
+				808966EC1CD7C2210099FF06 /* util.cpp in Sources */,
 				800BC41D1CD75A8900C74F2C /* vm_api.cpp in Sources */,
 				800BC4031CD6458500C74F2C /* engine.cpp in Sources */,
+				8048E4B01CD7CD1B00676C4F /* spherefs.cpp in Sources */,
 				800BC40F1CD6679E00C74F2C /* runtime.cpp in Sources */,
 				800BC4071CD652E100C74F2C /* window.cpp in Sources */,
 			);

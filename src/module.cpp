@@ -9,19 +9,16 @@
 #include "module.hpp"
 #include "macros.hpp"
 #include "runtime.hpp"
+#include "util.hpp"
 
-#include <fstream>
-#include <sstream>
+#include <cassert>
 
 #include <SDL2/SDL_filesystem.h>
 
 #include <js/Conversions.h>
 
-namespace delphinus {
-
-std::string readFile(std::string path);
-std::string stringFromValue(JSContext *context, JS::HandleValue value);
 bool api_require(JSContext *context, uint argc, JS::Value *vp);
+bool api_resolve(JSContext *context, uint argc, JS::Value *vp);
 
 static JSClass moduleScopeClass = {
     "global", JSCLASS_GLOBAL_FLAGS,
@@ -32,45 +29,37 @@ static JSClass moduleClass = {
     "Module", 0
 };
 
-void Module::module_trace_func(JSTracer *tracer, void *data) {
-    Module *mod = (Module *)data;
-
-    if (mod->exports)
-        JS_CallObjectTracer(tracer, &(mod->exports), "exports");
-
-    if (mod->scope)
-        JS_CallObjectTracer(tracer, &(mod->scope), "scope");
-
-    if (mod->script)
-        JS_CallScriptTracer(tracer, &(mod->script), "script");
-}
-
-Module::Module(Runtime *runtime, const std::string &directory, const std::string &scriptName) {
-    _filename = scriptName;
-    _directory = directory;
-
-    name = "hello"; // TODO make unique
-
-    JS_AddExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
-}
-
-Module::~Module() {
-}
-
-// TODO: make an actual safe method... this sucks.
-// Resolve to having to ..
-std::string Module::getScriptPath() {
-    return _directory + "/" + _filename;
-}
-
 static bool ModuleObject(JSContext *context, uint argc, JS::Value *vp) {
     return true;
 }
 
-bool Module::run(Runtime *runtime) {
-    LOG("Loading module %s/%s", _directory.c_str(), _filename.c_str());
+#pragma mark - Module Class
 
+delphinus::Module::Module(Runtime *runtime, std::string moduleId, std::string path) {
+    size_t splitPos = path.rfind("/");
+    if (splitPos == std::string::npos) {
+        _filename = path;
+        _directory = "";
+    } else {
+        _filename = path.substr(splitPos + 1);
+        _directory = path.substr(0, splitPos);
+    }
+
+    name = path; // TODO make unique
+
+    JS_AddExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
+}
+
+// TODO: make an actual safe method... this sucks.
+// Resolve to having to ..
+std::string delphinus::Module::getScriptPath() {
+    return _directory + "/" + _filename;
+}
+
+bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     JSContext *context = runtime->context;
+
+    assert(!JS_IsExceptionPending(context));
 
 #pragma mark - Create scope
 
@@ -116,12 +105,19 @@ bool Module::run(Runtime *runtime) {
 
     // Define require function
     JS::RootedObject require(context, (JSObject *)JS_DefineFunction(context,
-                                                                moduleScope,
-                                                                "require",
-                                                                &api_require, 1,
-                                                                JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT));
+                                                                    moduleScope,
+                                                                    "require",
+                                                                    &api_require, 1,
+                                                                    JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT));
     if (!require) {
         LOG("Failed to define 'require'");
+        return false;
+    }
+
+    if(!JS_DefineFunction(context, require,
+                          "resolve", &api_resolve, 1,
+                          JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+        LOG("Failed to define 'require.resolve'");
         return false;
     }
 
@@ -134,7 +130,7 @@ bool Module::run(Runtime *runtime) {
         return false;
     }
 
-//    JS_SetPrivate(require.get(), (void *)this);
+    //    JS_SetPrivate(require.get(), (void *)this);
 
     // Add exports and module properties
     exports = JS_NewPlainObject(context);
@@ -149,7 +145,7 @@ bool Module::run(Runtime *runtime) {
     // Create the Module class and prototype
     JS::RootedObject moduleObjectProto(context, JS_InitClass(context, moduleScope, nullptr, &moduleClass, ModuleObject, 0, nullptr, nullptr, nullptr, nullptr));
     if (!moduleObjectProto)
-        FATAL("Could not create Module prototype");
+    FATAL("Could not create Module prototype");
 
     // Create a new module object
     JS::RootedObject moduleObj(context, JS_NewObjectWithGivenProto(context, &moduleClass, moduleObjectProto));
@@ -161,7 +157,7 @@ bool Module::run(Runtime *runtime) {
     }
 
     // Add 'module.id'
-    JS::RootedString moduleId(context, JS_NewStringCopyZ(context, name));
+    JS::RootedString moduleId(context, JS_NewStringCopyZ(context, name.c_str()));
     if (!JS_DefineProperty(context, moduleObj,
                            "id", moduleId,
                            JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
@@ -172,14 +168,12 @@ bool Module::run(Runtime *runtime) {
 #pragma mark - Load and run script
     // Load script data from
     std::string path = getScriptPath();
-    std::string scriptContents = readFile(path);
-
-    if(scriptContents.length() == 0) {
+    std::string scriptContents;
+    if (!readFile(path, scriptContents))
         return false;
-    }
 
     JS::OwningCompileOptions options(context);
-    options.setFileAndLine(context, path.c_str(), 1);
+    options.setFileAndLine(context, name.c_str(), 1);
     options.setIntroductionScript(nullptr); // script that initiated the require()
     options.setVersion(JSVERSION_LATEST);
     options.setUTF8(true);
@@ -194,59 +188,86 @@ bool Module::run(Runtime *runtime) {
     }
     script = rtScript;
 
-//    JS_MaybeGC(context);
-
     JS::RootedValue rval(context);
-    return JS_ExecuteScript(context, rtScript, &rval);
-}
+    if(!JS_ExecuteScript(context, rtScript, &rval)) {
+        return false;
+        /*
+        LOG("Failed to execute script '%s'", name.c_str());
 
-#pragma mark - Tools
+        JS::RootedValue exception(context);
+        if (JS_GetPendingException(context, &exception)) {
 
-std::string readFile(std::string path) {
-    std::string base(SDL_GetBasePath());
-    std::stringstream buffer;
+            JS_ReportPendingException(context);
+//            JS_ClearPendingException(context);
 
-    std::string fullPath = base + path;
+            return true;
+        }
 
-    std::ifstream file(fullPath);
-
-    if (!file) {
-        LOG("Could not load script %s", fullPath.c_str());
-        return "";
+        return false;*/
     }
 
-    buffer << file.rdbuf();
-
-    return buffer.str();
+    return true;
 }
 
-std::string stringFromValue(JSContext *context, JS::HandleValue value) {
-    JS::RootedString module(context, JS::ToString(context, value));
-    if (!module)
-        return nullptr;
+#pragma mark - Memory management
 
-    char *moduleName = JS_EncodeStringToUTF8(context, module);
-    if(!moduleName)
-        return nullptr;
+void delphinus::Module::module_trace_func(JSTracer *tracer, void *data) {
+    Module *mod = (Module *)data;
 
-    std::string result(moduleName);
+    if (mod->exports) JS_CallObjectTracer(tracer, &(mod->exports), "exports");
+    if (mod->scope) JS_CallObjectTracer(tracer, &(mod->scope), "scope");
+    if (mod->script) JS_CallScriptTracer(tracer, &(mod->script), "script");
+}
 
-    JS_free(context, moduleName);
-    
-    return result;
+JSObject *delphinus::Module::getExports(JSContext *context) {
+    JS::RootedObject rtExports(context, exports);
+
+    return rtExports;
 }
 
 #pragma mark - API
 
-bool api_require(JSContext *context, uint argc, JS::Value *vp) {
+std::string resolveModuleId(std::string moduleId) {
+    return std::string(SDL_GetBasePath()) + "/test.js";
+}
+
+bool api_resolve(JSContext *context, uint argc, JS::Value *vp) {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 
     std::string module = stringFromValue(context, args.get(0));
+    std::string path = resolveModuleId(module);
 
-    LOG("require() called, %u, %s", argc, module.c_str());
-
-    args.rval().setNumber(42.0);
+    args.rval().setString(JS_NewStringCopyZ(context, path.c_str()));
     return true;
 }
 
+bool api_require(JSContext *context, uint argc, JS::Value *vp) {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
+    std::string moduleId = stringFromValue(context, args.get(0));
+    std::string path = resolveModuleId(moduleId);
+
+    LOG("require('%s') called. Resolved to %s", moduleId.c_str(), path.c_str());
+
+    // Get the runtime
+    JSRuntime *jsRuntime = JS_GetRuntime(context);
+    delphinus::Runtime *runtime = (delphinus::Runtime *)JS_GetRuntimePrivate(jsRuntime);
+
+    // Create the module
+    // TODO; actually get it from cache
+    delphinus::Module *module = new delphinus::Module(runtime, moduleId, path);
+
+    // Load the module
+    if (!module->loadIntoRuntime(runtime))
+        return false;
+
+    // Get the exports
+    JS::RootedObject exports(context, module->getExports(context));
+    if (!JS_WrapObject(context, &exports)) {
+        args.rval().setUndefined();
+    } else {
+        args.rval().setObjectOrNull(exports);
+    }
+
+    return true;
 }

@@ -1,7 +1,3 @@
-require("./test");
+let x = require("./test");
 
-//console.log("Hello World! ");
-
-exports.foo = function(a, b) {
-    return a + b;
-};
+throw "Added 1 and 2: " + x.foo(1,2);
