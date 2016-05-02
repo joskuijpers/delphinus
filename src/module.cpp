@@ -196,30 +196,12 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     JS::RootedScript rtScript(context);
     if (!JS::Compile(context, options, scriptContents.c_str(),
                      strlen(scriptContents.c_str()), &rtScript)) {
-        LOG("Compile error");
         return false;
     }
     script = rtScript;
 
     JS::RootedValue rval(context);
-    if(!JS_ExecuteScript(context, rtScript, &rval)) {
-        return false;
-        /*
-        LOG("Failed to execute script '%s'", name.c_str());
-
-        JS::RootedValue exception(context);
-        if (JS_GetPendingException(context, &exception)) {
-
-            JS_ReportPendingException(context);
-//            JS_ClearPendingException(context);
-
-            return true;
-        }
-
-        return false;*/
-    }
-
-    return true;
+    return JS_ExecuteScript(context, rtScript, &rval);
 }
 
 #pragma mark - Memory management
