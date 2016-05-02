@@ -14,7 +14,7 @@
 
 namespace delphinus {
 
-    class Runtime;
+class Runtime;
 
 class Module {
     std::string name;
@@ -32,6 +32,7 @@ public:
     bool loadIntoRuntime(Runtime *runtime);
 
     JSObject *getExports(JSContext *context);
+    std::string getModuleId();
 private:
     static void module_trace_func(JSTracer *tracer, void *data);
     std::string getScriptPath();

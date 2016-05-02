@@ -13,9 +13,12 @@
 #include "console_api.hpp"
 
 #include <cassert>
+#include <forward_list>
 
 #include <SDL2/SDL_filesystem.h>
 #include <js/Conversions.h>
+
+#define JSPROP_ENREPE (JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
 
 bool api_require(JSContext *context, uint argc, JS::Value *vp);
 bool api_resolve(JSContext *context, uint argc, JS::Value *vp);
@@ -45,7 +48,7 @@ delphinus::Module::Module(Runtime *runtime, std::string moduleId, std::string pa
         _directory = path.substr(0, splitPos);
     }
 
-    name = path; // TODO make unique
+    name = moduleId;
 
     JS_AddExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
 }
@@ -54,6 +57,16 @@ delphinus::Module::Module(Runtime *runtime, std::string moduleId, std::string pa
 // Resolve to having to ..
 std::string delphinus::Module::getScriptPath() {
     return _directory + "/" + _filename;
+}
+
+std::string delphinus::Module::getModuleId() {
+    return name;
+}
+
+JSObject *delphinus::Module::getExports(JSContext *context) {
+    JS::RootedObject rtExports(context, exports);
+
+    return rtExports;
 }
 
 bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleScope) {
@@ -120,7 +133,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
                                                                     moduleScope,
                                                                     "require",
                                                                     &api_require, 1,
-                                                                    JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT));
+                                                                    JSPROP_ENREPE));
     if (!require) {
         LOG("Failed to define 'require'");
         return false;
@@ -128,7 +141,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
 
     if(!JS_DefineFunction(context, require,
                           "resolve", &api_resolve, 1,
-                          JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+                          JSPROP_ENREPE)) {
         LOG("Failed to define 'require.resolve'");
         return false;
     }
@@ -137,7 +150,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     JS::RootedValue mainModule(context, JS::NullValue()); // TODO
     if (!JS_DefineProperty(context, require,
                            "main", mainModule,
-                           JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+                           JSPROP_ENREPE)) {
         LOG("Failed to define 'require.main'");
         return false;
     }
@@ -149,7 +162,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     JS::RootedObject rtExports(context, exports);
     if (!JS_DefineProperty(context, moduleScope,
                            "exports", rtExports,
-                           JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+                           JSPROP_ENREPE)) {
         LOG("Failed to define 'exports");
         return false;
     }
@@ -164,7 +177,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     JS::RootedObject moduleObj(context, JS_NewObjectWithGivenProto(context, &moduleClass, moduleObjectProto));
     if (!JS_DefineProperty(context, moduleScope,
                            "module", moduleObj,
-                           JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+                           JSPROP_ENREPE)) {
         LOG("Failed to define 'module");
         return false;
     }
@@ -173,7 +186,7 @@ bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
     JS::RootedString moduleId(context, JS_NewStringCopyZ(context, name.c_str()));
     if (!JS_DefineProperty(context, moduleObj,
                            "id", moduleId,
-                           JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)) {
+                           JSPROP_ENREPE)) {
         LOG("Failed to define 'module.id'");
         return false;
     }
@@ -214,17 +227,35 @@ void delphinus::Module::module_trace_func(JSTracer *tracer, void *data) {
     if (mod->script) JS_CallScriptTracer(tracer, &(mod->script), "script");
 }
 
-JSObject *delphinus::Module::getExports(JSContext *context) {
-    JS::RootedObject rtExports(context, exports);
+#pragma mark - Resolver
 
-    return rtExports;
+std::string resolveModuleId(std::string moduleId) {
+    std::string path = std::string(SDL_GetBasePath()) + "test.js";
+
+    LOG("require('%s') called. Resolved to %s", moduleId.c_str(), path.c_str());
+
+    return path;
+}
+
+#pragma mark - Module Cache
+
+static std::forward_list<delphinus::Module *> moduleCache_list;
+
+delphinus::Module *moduleCache_lookup(std::string moduleId) {
+    for (auto it = moduleCache_list.begin(); it != moduleCache_list.end(); ++it) {
+        if ((*it)->getModuleId().compare(moduleId) == 0) {
+            return *it;
+        }
+    }
+
+    return nullptr;
+}
+
+void moduleCache_add(delphinus::Module *module) {
+    moduleCache_list.push_front(module);
 }
 
 #pragma mark - API
-
-std::string resolveModuleId(std::string moduleId) {
-    return std::string(SDL_GetBasePath()) + "/test.js";
-}
 
 bool api_resolve(JSContext *context, uint argc, JS::Value *vp) {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
@@ -237,25 +268,29 @@ bool api_resolve(JSContext *context, uint argc, JS::Value *vp) {
 }
 
 bool api_require(JSContext *context, uint argc, JS::Value *vp) {
-    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+    delphinus::Module *module;
+    std::string moduleId;
+    JS::CallArgs args;
 
-    std::string moduleId = stringFromValue(context, args.get(0));
-    std::string path = resolveModuleId(moduleId);
+    args = JS::CallArgsFromVp(argc, vp);
+    moduleId = stringFromValue(context, args.get(0)); // TODO: normalize
 
-    LOG("require('%s') called. Resolved to %s", moduleId.c_str(), path.c_str());
+    module = moduleCache_lookup(moduleId);
+    if (module == nullptr) {
+        std::string path;
+        delphinus::Runtime *runtime;
 
-    // Get the runtime
-    delphinus::Runtime *runtime = delphinus::Runtime::getCurrent(context);
+        runtime = delphinus::Runtime::getCurrent(context);
+        path = resolveModuleId(moduleId);
+        module = new delphinus::Module(runtime, moduleId, path);
 
-    // Create the module
-    // TODO; actually get it from cache
-    delphinus::Module *module = new delphinus::Module(runtime, moduleId, path);
+        if (!module->loadIntoRuntime(runtime))
+            return false;
 
-    // Load the module
-    if (!module->loadIntoRuntime(runtime))
-        return false;
+        moduleCache_add(module);
+    }
 
-    // Get the exports
+    // Get and return the exports
     JS::RootedObject exports(context, module->getExports(context));
     if (!JS_WrapObject(context, &exports)) {
         args.rval().setUndefined();
