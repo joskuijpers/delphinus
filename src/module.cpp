@@ -37,7 +37,7 @@ static bool ModuleObject(JSContext *context, uint argc, JS::Value *vp) {
 
 #pragma mark - Module Class
 
-delphinus::Module::Module(Runtime *runtime, std::string moduleId, std::string path) {
+delphinus::Module::Module(Runtime *runt, std::string moduleId, std::string path) {
     size_t splitPos = path.rfind("/");
     if (splitPos == std::string::npos) {
         _filename = path;
@@ -48,8 +48,13 @@ delphinus::Module::Module(Runtime *runtime, std::string moduleId, std::string pa
     }
 
     name = moduleId;
+    runtime = runt;
 
     JS_AddExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
+}
+
+delphinus::Module::~Module() {
+    JS_RemoveExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
 }
 
 // TODO: make an actual safe method... this sucks.
@@ -90,7 +95,7 @@ bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleSc
     return true;
 }
 
-bool delphinus::Module::loadIntoRuntime(Runtime *runtime) {
+bool delphinus::Module::loadIntoRuntime() {
     JSContext *context = runtime->context;
 
     assert(!JS_IsExceptionPending(context));
@@ -241,10 +246,18 @@ std::string resolveModuleId(std::string moduleId) {
 
 #pragma mark - Module Cache
 
-static std::forward_list<delphinus::Module *> moduleCache_list;
+static std::unique_ptr<delphinus::ModuleCache> g_moduleCache = nullptr;
 
-delphinus::Module *moduleCache_lookup(std::string moduleId) {
-    for (auto it = moduleCache_list.begin(); it != moduleCache_list.end(); ++it) {
+delphinus::ModuleCache::ModuleCache() {
+
+}
+
+delphinus::ModuleCache::~ModuleCache() {
+    list.clear();
+}
+
+std::shared_ptr<delphinus::Module> delphinus::ModuleCache::lookup(std::string moduleId) {
+    for (auto it = list.begin(); it != list.end(); ++it) {
         if ((*it)->getModuleId().compare(moduleId) == 0) {
             return *it;
         }
@@ -253,8 +266,22 @@ delphinus::Module *moduleCache_lookup(std::string moduleId) {
     return nullptr;
 }
 
-void moduleCache_add(delphinus::Module *module) {
-    moduleCache_list.push_front(module);
+void delphinus::ModuleCache::add(std::shared_ptr<delphinus::Module> module) {
+    list.push_front(module);
+}
+
+void delphinus::moduleCache_create() {
+    if (g_moduleCache != nullptr)
+        FATAL("Module cache already created");
+
+    g_moduleCache = std::unique_ptr<delphinus::ModuleCache>(new ModuleCache());
+}
+
+void delphinus::moduleCache_dispose() {
+    if (g_moduleCache == nullptr)
+        FATAL("Module cache not yet created");
+
+    g_moduleCache.reset();
 }
 
 #pragma mark - API
@@ -270,26 +297,26 @@ bool api_resolve(JSContext *context, uint argc, JS::Value *vp) {
 }
 
 bool api_require(JSContext *context, uint argc, JS::Value *vp) {
-    delphinus::Module *module;
     std::string moduleId;
     JS::CallArgs args;
+    std::shared_ptr<delphinus::Module> module;
 
     args = JS::CallArgsFromVp(argc, vp);
     moduleId = stringFromValue(context, args.get(0)); // TODO: normalize
 
-    module = moduleCache_lookup(moduleId);
+    module = g_moduleCache->lookup(moduleId);
     if (module == nullptr) {
         std::string path;
         delphinus::Runtime *runtime;
 
         runtime = delphinus::Runtime::getCurrent(context);
         path = resolveModuleId(moduleId);
-        module = new delphinus::Module(runtime, moduleId, path);
+        module = std::shared_ptr<delphinus::Module>(new delphinus::Module(runtime, moduleId, path));
 
-        if (!module->loadIntoRuntime(runtime))
+        if (!module->loadIntoRuntime())
             return false;
 
-        moduleCache_add(module);
+        g_moduleCache->add(module);
     }
 
     // Get and return the exports

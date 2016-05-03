@@ -36,9 +36,13 @@ delphinus::Runtime::Runtime() {
     context = JS_NewContext(runtime, 8192);
     if (context == nullptr)
         FATAL("Could not create JS context");
+
+    delphinus::moduleCache_create();
 }
 
 delphinus::Runtime::~Runtime() {
+    delphinus::moduleCache_dispose();
+
     JS_DestroyContextNoGC(context);
     JS_DestroyRuntime(runtime);
 
@@ -53,7 +57,9 @@ void delphinus::Runtime::run() {
     // Load main module
     Module *mainModule = new Module(this, "main", std::string(SDL_GetBasePath()) + "main.js");
 
-    mainModule->loadIntoRuntime(this);
+    mainModule->loadIntoRuntime();
+
+    delete mainModule;
 }
 
 static void reportError(JSContext *cx, const char *message, JSErrorReport *report) {

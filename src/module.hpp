@@ -9,6 +9,9 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <forward_list>
+
 #include <jsapi.h>
 #include "types.hpp"
 
@@ -16,7 +19,7 @@ namespace delphinus {
 
 class Runtime;
 
-class Module {
+class Module : public std::enable_shared_from_this<Module> {
     std::string name;
 
     JS::Heap<JSObject *> exports;
@@ -26,10 +29,13 @@ class Module {
     std::string _filename;
     std::string _directory;
 
+    Runtime *runtime;
+
 public:
     Module(Runtime *runtime, std::string moduleId, std::string path);
+    ~Module();
 
-    bool loadIntoRuntime(Runtime *runtime);
+    bool loadIntoRuntime();
 
     JSObject *getExports(JSContext *context);
     std::string getModuleId();
@@ -38,5 +44,19 @@ private:
     std::string getScriptPath();
     bool addGlobals(JSContext *context, JS::HandleObject moduleScope);
 };
-    
+
+class ModuleCache {
+    std::forward_list<std::shared_ptr<Module>> list;
+
+public:
+    ModuleCache();
+    ~ModuleCache();
+
+    std::shared_ptr<Module> lookup(std::string moduleId);
+    void add(std::shared_ptr<Module> module);
+};
+
+void moduleCache_create();
+void moduleCache_dispose();
+
 }

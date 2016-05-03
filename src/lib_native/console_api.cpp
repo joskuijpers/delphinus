@@ -27,22 +27,21 @@ bool api_new_console(JSContext *context, uint argc, JS::Value *vp) {
 bool api_console_print(JSContext *context, uint argc, JS::Value *vp, const char *prefix) {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 
-    // Concatenate all arguments
-    std::string result = "";
-    for(uint i = 0; i < args.length(); ++i) {
-        JS::RootedString jsString(context, args.get(i).toString());
-
-        char *moduleName = JS_EncodeStringToUTF8(context, jsString);
-        if(moduleName) {
-            result.append(" ");
-            result.append(moduleName);
-
-            JS_free(context, moduleName);
-        }
+    if (args.length() != 1) {
+        return true;
     }
 
-    printf("[CONSOLE: %s] %s\n", prefix, result.c_str());
-    
+    JS::RootedString jsString(context, args.get(0).toString());
+
+    char *value = JS_EncodeStringToUTF8(context, jsString);
+    if(value) {
+        printf("[CONSOLE: %s] %s\n", prefix, value);
+
+        JS_free(context, value);
+    } else {
+        printf("No Console?");
+    }
+
     return true;
 }
 

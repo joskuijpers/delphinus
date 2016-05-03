@@ -8,12 +8,14 @@
 
 #pragma once
 
+#include <memory>
+
 #include "types.hpp"
 #include <jsapi.h>
 
 namespace delphinus {
 
-class Runtime {
+class Runtime : public std::enable_shared_from_this<Runtime> {
 public:
     JSRuntime *runtime;
     JSContext *context;
