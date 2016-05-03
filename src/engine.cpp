@@ -13,11 +13,13 @@
 
 #include <SDL2/SDL.h>
 
+#include "spherefs.hpp"
 
 void printEvent(const SDL_Event *);
 
+using namespace delphinus;
 
-delphinus::Engine::Engine() {
+Engine::Engine() {
     runtime = new Runtime();
 
     // Load default scripts
@@ -30,19 +32,26 @@ delphinus::Engine::Engine() {
     window = new Window(800, 600);
 }
 
-delphinus::Engine::~Engine() {
+Engine::~Engine() {
     delete window;
     delete runtime;
 
     SDL_Quit();
 }
 
-int delphinus::Engine::run() {
+int Engine::run() {
 
-    /*
-     Run the main script (is blocking)
-     */
-    runtime->run();
+    Sandbox *sandbox = new Sandbox();
+
+    Path p("tools.js");
+    File *f = sandbox->open(p, "r");
+
+    LOG("File %p, path %s", f, sandbox->resolve(p).c_str());
+
+    delete sandbox;
+
+
+//    runtime->run();
 /*
     bool running = true;
 
@@ -162,7 +171,7 @@ void printEvent(const SDL_Event *event) {
     }*/
 
 int main(int argc, const char * argv[]) {
-    delphinus::Engine engine;
+    Engine engine;
 
     return engine.run();
 }

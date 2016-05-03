@@ -11,51 +11,99 @@
 #include <string>
 #include <vector>
 
+#include <SDL2/SDL_rwops.h>
+
 namespace delphinus {
 
-    class Path {
-        std::vector<std::string> elements;
+    class File;
+    class Sandbox;
 
-    public:
-        Path();
-        Path(std::string base_dir, std::string name);
-        Path(std::string path);
+typedef enum {
+    SYSTEM, // ~sys/
+    GAME, // *
+    USER, // ~usr/
+    ABSOLUTE // /
+} path_type_t;
 
-        ~Path();
+// SFS path: inside the sandbox
+class Path {
+    std::vector<std::string> elements;
+    path_type_t type;
 
-    private:
-        void constructElements(std::string path);
-    };
+public:
+    Path(std::string base_dir, std::string name);
+    Path(std::string path);
+    ~Path();
 
-    class Sandbox {
-    public:
-        Sandbox();
+    /**
+     * Get the SFS path string.
+     */
+    std::string getString();
 
-//        File *open(Path, mode);
-//        close(File*)
+    bool hasExtension(std::string extension);
+    bool isFile();
+    bool isRooted();
+
+    // append, append_dir
+    // compare (== operator)
+
+private:
+    void constructPath(std::string path);
+};
+
+// Sandbox: everything is below BasePath or PrefPath.
+class Sandbox {
+    friend File;
+
+    std::string basePath;
+    std::string prefPath;
+public:
+    Sandbox();
+
+    /**
+     * Resolve a SFS path to an OS path.
+     */
+    std::string resolve(Path path);
+
+    /**
+     * Whether given path is inside the sandbox.
+     */
+    bool containsPath(std::string nativePath);
+
+    /**
+     * Open a file in the sandbox
+     */
+    File *open(Path path, std::string mode);
 //        exists(Path)
 //        std::string slurp(Path)
 //        byte *slurp(Path, out_size)
 //        spew(Path, buf, size)
 //        spew(Path, std::string)
 //        mkdir(Path)
-//        rmdit(Path)
+//        rmdir(Path)
 //        rename(Path, Path)
 
-    private:
+private:
 //        resolve(Path) // resolve Sandboxed path to real path
-    };
+};
 
-    class File {
-        friend Sandbox;
-    public:
+class File {
+    friend Sandbox;
 
-//        putc(File*)
-//        puts(File*)
-//        size_t read(buf, size, count, File*) + string version
-//        size_t write(buf, size, count) + string versions
-//        seek(offset, whence)
-//        tell
-    };
+    SDL_RWops *rwOps;
+
+    File(std::string path, std::string mode);
+    ~File();
+public:
+    size_t read(void *buffer, size_t size, size_t num = 1);
+    size_t write(const void *buffer, size_t size, size_t num = 1);
+    void puts(std::string str);
+
+    size_t seek(size_t offset, int whence);
+    size_t tell();
+    size_t getSize();
+
+    void close();
+};
 
 }

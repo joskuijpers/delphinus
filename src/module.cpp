@@ -18,6 +18,8 @@
 #include <SDL2/SDL_filesystem.h>
 #include <js/Conversions.h>
 
+using namespace delphinus;
+
 bool api_require(JSContext *context, uint argc, JS::Value *vp);
 bool api_resolve(JSContext *context, uint argc, JS::Value *vp);
 
@@ -36,7 +38,7 @@ static bool ModuleObject(JSContext *context, uint argc, JS::Value *vp) {
 
 #pragma mark - Module Class
 
-delphinus::Module::Module(Runtime *runt, std::string moduleId, std::string path) {
+Module::Module(Runtime *runt, std::string moduleId, std::string path) {
     size_t splitPos = path.rfind("/");
     if (splitPos == std::string::npos) {
         _filename = path;
@@ -52,27 +54,27 @@ delphinus::Module::Module(Runtime *runt, std::string moduleId, std::string path)
     JS_AddExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
 }
 
-delphinus::Module::~Module() {
+Module::~Module() {
     JS_RemoveExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
 }
 
 // TODO: make an actual safe method... this sucks.
 // Resolve to having to ..
-std::string delphinus::Module::getScriptPath() {
+std::string Module::getScriptPath() {
     return _directory + "/" + _filename;
 }
 
-std::string delphinus::Module::getModuleId() {
+std::string Module::getModuleId() {
     return name;
 }
 
-JSObject *delphinus::Module::getExports(JSContext *context) {
+JSObject *Module::getExports(JSContext *context) {
     JS::RootedObject rtExports(context, exports);
 
     return rtExports;
 }
 
-bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleScope) {
+bool Module::addGlobals(JSContext *context, JS::HandleObject moduleScope) {
     // Add std classes
     if (!JS_InitStandardClasses(context, moduleScope)) {
         LOG("Could not create standard classes");
@@ -80,7 +82,7 @@ bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleSc
     }
 
     // Add __delphinus object
-    if (!delphinus::api::vm_addToScope(context, moduleScope)) {
+    if (!api::vm_addToScope(context, moduleScope)) {
         LOG("Failed to add __delphinus to module scope");
         return false;
     }
@@ -117,7 +119,7 @@ bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleSc
     return true;
 }
 
-bool delphinus::Module::loadIntoRuntime() {
+bool Module::loadIntoRuntime() {
     JSContext *context = runtime->context;
 
     assert(!JS_IsExceptionPending(context));
@@ -249,7 +251,7 @@ bool delphinus::Module::loadIntoRuntime() {
 
 #pragma mark - Memory management
 
-void delphinus::Module::module_trace_func(JSTracer *tracer, void *data) {
+void Module::module_trace_func(JSTracer *tracer, void *data) {
     Module *mod = (Module *)data;
 
     if (mod->exports) JS_CallObjectTracer(tracer, &(mod->exports), "exports");
@@ -269,17 +271,17 @@ std::string resolveModuleId(std::string moduleId) {
 
 #pragma mark - Module Cache
 
-static std::unique_ptr<delphinus::ModuleCache> g_moduleCache = nullptr;
+static std::unique_ptr<ModuleCache> g_moduleCache = nullptr;
 
-delphinus::ModuleCache::ModuleCache() {
+ModuleCache::ModuleCache() {
 
 }
 
-delphinus::ModuleCache::~ModuleCache() {
+ModuleCache::~ModuleCache() {
     list.clear();
 }
 
-std::shared_ptr<delphinus::Module> delphinus::ModuleCache::lookup(std::string moduleId) {
+std::shared_ptr<Module> ModuleCache::lookup(std::string moduleId) {
     for (auto it = list.begin(); it != list.end(); ++it) {
         if ((*it)->getModuleId().compare(moduleId) == 0) {
             return *it;
@@ -289,7 +291,7 @@ std::shared_ptr<delphinus::Module> delphinus::ModuleCache::lookup(std::string mo
     return nullptr;
 }
 
-void delphinus::ModuleCache::add(std::shared_ptr<delphinus::Module> module) {
+void ModuleCache::add(std::shared_ptr<Module> module) {
     list.push_front(module);
 }
 
@@ -297,7 +299,7 @@ void delphinus::moduleCache_create() {
     if (g_moduleCache != nullptr)
         FATAL("Module cache already created");
 
-    g_moduleCache = std::unique_ptr<delphinus::ModuleCache>(new ModuleCache());
+    g_moduleCache = std::unique_ptr<ModuleCache>(new ModuleCache());
 }
 
 void delphinus::moduleCache_dispose() {
@@ -322,7 +324,7 @@ bool api_resolve(JSContext *context, uint argc, JS::Value *vp) {
 bool api_require(JSContext *context, uint argc, JS::Value *vp) {
     std::string moduleId;
     JS::CallArgs args;
-    std::shared_ptr<delphinus::Module> module;
+    std::shared_ptr<Module> module;
 
     args = JS::CallArgsFromVp(argc, vp);
     moduleId = stringFromValue(context, args.get(0)); // TODO: normalize
@@ -330,11 +332,11 @@ bool api_require(JSContext *context, uint argc, JS::Value *vp) {
     module = g_moduleCache->lookup(moduleId);
     if (module == nullptr) {
         std::string path;
-        delphinus::Runtime *runtime;
+        Runtime *runtime;
 
-        runtime = delphinus::Runtime::getCurrent(context);
+        runtime = Runtime::getCurrent(context);
         path = resolveModuleId(moduleId);
-        module = std::shared_ptr<delphinus::Module>(new delphinus::Module(runtime, moduleId, path));
+        module = std::shared_ptr<Module>(new Module(runtime, moduleId, path));
 
         if (!module->loadIntoRuntime())
             return false;
@@ -353,18 +355,18 @@ bool api_require(JSContext *context, uint argc, JS::Value *vp) {
     return true;
 }
 
-JSObject *delphinus::runtime_require(delphinus::Runtime *runtime, std::string moduleId) {
-    std::shared_ptr<delphinus::Module> module;
+JSObject *delphinus::runtime_require(Runtime *runtime, std::string moduleId) {
+    std::shared_ptr<Module> module;
     JSContext *context = runtime->context;
 
     module = g_moduleCache->lookup(moduleId);
     if (module == nullptr) {
         std::string path;
-        delphinus::Runtime *runtime;
+        Runtime *runtime;
 
-        runtime = delphinus::Runtime::getCurrent(context);
+        runtime = Runtime::getCurrent(context);
         path = resolveModuleId(moduleId);
-        module = std::shared_ptr<delphinus::Module>(new delphinus::Module(runtime, moduleId, path));
+        module = std::shared_ptr<Module>(new Module(runtime, moduleId, path));
 
         if (!module->loadIntoRuntime())
             return nullptr;
