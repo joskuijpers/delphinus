@@ -55,9 +55,11 @@ delphinus::Runtime *delphinus::Runtime::getCurrent(JSContext *context) {
 
 void delphinus::Runtime::run() {
     // Load main module
-    Module *mainModule = new Module(this, "main", std::string(SDL_GetBasePath()) + "main.js");
+    Module *mainModule = new Module(this, "main", std::string(SDL_GetBasePath()) + "game/main.js");
 
     mainModule->loadIntoRuntime();
+
+//    runtime_require(this, "main");
 
     delete mainModule;
 }

@@ -10,7 +10,6 @@
 #include "macros.hpp"
 #include "runtime.hpp"
 #include "util.hpp"
-#include "console_api.hpp"
 #include "vm_api.hpp"
 
 #include <cassert>
@@ -80,16 +79,39 @@ bool delphinus::Module::addGlobals(JSContext *context, JS::HandleObject moduleSc
         return false;
     }
 
-    // Add console object
-    if (!delphinus::api::console_addToScope(context, moduleScope)) {
-        LOG("Failed to add console to module scope");
-        return false;
-    }
-
     // Add __delphinus object
     if (!delphinus::api::vm_addToScope(context, moduleScope)) {
         LOG("Failed to add __delphinus to module scope");
         return false;
+    }
+
+    // These two are globals are thus loaded for every module. To prevent cyclic dependency,
+    // only load it if both are not available. This does mean 'engine' can't use console.log.
+    // It will have to reside with __delphinus.print.
+    if (name != "engine" && name != "console") {
+        // Add console object
+        JS::RootedObject consoleExports(context, runtime_require(runtime, "console"));
+        if (consoleExports == nullptr) {
+            LOG("Failed to load console system module");
+            return false;
+        }
+
+        if (!JS_DefineProperty(context, moduleScope, "console", consoleExports, JSPROP_ENREPE)) {
+            LOG("Failed to set console global property");
+            return false;
+        }
+
+        // Add engine object
+        JS::RootedObject engineExports(context, runtime_require(runtime, "engine"));
+        if (engineExports == nullptr) {
+            LOG("Failed to load engine system module");
+            return false;
+        }
+
+        if (!JS_DefineProperty(context, moduleScope, "engine", engineExports, JSPROP_ENREPE)) {
+            LOG("Failed to set engine global property");
+            return false;
+        }
     }
 
     return true;
@@ -177,7 +199,8 @@ bool delphinus::Module::loadIntoRuntime() {
     // Create the Module class and prototype
     JS::RootedObject moduleObjectProto(context, JS_InitClass(context, moduleScope, nullptr, &moduleClass, ModuleObject, 0, nullptr, nullptr, nullptr, nullptr));
     if (!moduleObjectProto) {
-        FATAL("Could not create Module prototype");
+        LOG("Could not create Module prototype");
+        return false;
     }
 
     // Create a new module object
@@ -237,7 +260,7 @@ void delphinus::Module::module_trace_func(JSTracer *tracer, void *data) {
 #pragma mark - Resolver
 
 std::string resolveModuleId(std::string moduleId) {
-    std::string path = std::string(SDL_GetBasePath()) + "test.js";
+    std::string path = std::string(SDL_GetBasePath()) + "system/" + moduleId + ".js";
 
     LOG("require('%s') called. Resolved to %s", moduleId.c_str(), path.c_str());
 
@@ -328,4 +351,32 @@ bool api_require(JSContext *context, uint argc, JS::Value *vp) {
     }
 
     return true;
+}
+
+JSObject *delphinus::runtime_require(delphinus::Runtime *runtime, std::string moduleId) {
+    std::shared_ptr<delphinus::Module> module;
+    JSContext *context = runtime->context;
+
+    module = g_moduleCache->lookup(moduleId);
+    if (module == nullptr) {
+        std::string path;
+        delphinus::Runtime *runtime;
+
+        runtime = delphinus::Runtime::getCurrent(context);
+        path = resolveModuleId(moduleId);
+        module = std::shared_ptr<delphinus::Module>(new delphinus::Module(runtime, moduleId, path));
+
+        if (!module->loadIntoRuntime())
+            return nullptr;
+
+        g_moduleCache->add(module);
+    }
+
+    // Get and return the exports
+    JS::RootedObject exports(context, module->getExports(context));
+    if (!JS_WrapObject(context, &exports)) {
+        return nullptr;
+    }
+
+    return exports.get();
 }

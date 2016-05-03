@@ -42,14 +42,20 @@
 		800BC4191CD75A5700C74F2C /* engine.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC4181CD75A5700C74F2C /* engine.js */; };
 		800BC41C1CD75A8900C74F2C /* vm_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41A1CD75A8900C74F2C /* vm_api.cpp */; };
 		800BC41D1CD75A8900C74F2C /* vm_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41A1CD75A8900C74F2C /* vm_api.cpp */; };
-		800BC4201CD75E3C00C74F2C /* console_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41E1CD75E3C00C74F2C /* console_api.cpp */; };
-		800BC4211CD75E3C00C74F2C /* console_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41E1CD75E3C00C74F2C /* console_api.cpp */; };
-		800BC4271CD77AD700C74F2C /* main.js in Copy Example code */ = {isa = PBXBuildFile; fileRef = 800BC4261CD77AC400C74F2C /* main.js */; };
+		800BC4271CD77AD700C74F2C /* main.js in Copy Game */ = {isa = PBXBuildFile; fileRef = 800BC4261CD77AC400C74F2C /* main.js */; };
 		8048E4AF1CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
 		8048E4B01CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
+		8048E4B21CD9407900676C4F /* console.js in Resources */ = {isa = PBXBuildFile; fileRef = 8048E4B11CD9407900676C4F /* console.js */; };
+		8048E4B41CD9467700676C4F /* Promise.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3E81CCE91E300C74F2C /* Promise.js */; };
+		8048E4B51CD9467700676C4F /* async.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3F71CCFC17900C74F2C /* async.js */; };
+		8048E4B61CD9467700676C4F /* engine.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC4181CD75A5700C74F2C /* engine.js */; };
+		8048E4B71CD9467700676C4F /* assert.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3F81CCFF51A00C74F2C /* assert.js */; };
+		8048E4B81CD9467700676C4F /* util.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3FA1CD01CD000C74F2C /* util.js */; };
+		8048E4B91CD9467700676C4F /* random.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3FC1CD6317900C74F2C /* random.js */; };
+		8048E4BA1CD9467700676C4F /* console.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 8048E4B11CD9407900676C4F /* console.js */; };
 		808966EB1CD7C2210099FF06 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 808966E91CD7C2210099FF06 /* util.cpp */; };
 		808966EC1CD7C2210099FF06 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 808966E91CD7C2210099FF06 /* util.cpp */; };
-		80FD9A511CD7B52700D27F9D /* test.js in Copy Example code */ = {isa = PBXBuildFile; fileRef = 80FD9A501CD7B52600D27F9D /* test.js */; };
+		80FD9A511CD7B52700D27F9D /* test.js in Copy Game */ = {isa = PBXBuildFile; fileRef = 80FD9A501CD7B52600D27F9D /* test.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -89,16 +95,33 @@
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		800BC4221CD77A8F00C74F2C /* Copy Example code */ = {
+		800BC4221CD77A8F00C74F2C /* Copy Game */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "";
+			dstPath = game;
 			dstSubfolderSpec = 7;
 			files = (
-				800BC4271CD77AD700C74F2C /* main.js in Copy Example code */,
-				80FD9A511CD7B52700D27F9D /* test.js in Copy Example code */,
+				800BC4271CD77AD700C74F2C /* main.js in Copy Game */,
+				80FD9A511CD7B52700D27F9D /* test.js in Copy Game */,
 			);
-			name = "Copy Example code";
+			name = "Copy Game";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8048E4B31CD9466600676C4F /* Copy System Library */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = system;
+			dstSubfolderSpec = 7;
+			files = (
+				8048E4B41CD9467700676C4F /* Promise.js in Copy System Library */,
+				8048E4B51CD9467700676C4F /* async.js in Copy System Library */,
+				8048E4B61CD9467700676C4F /* engine.js in Copy System Library */,
+				8048E4B71CD9467700676C4F /* assert.js in Copy System Library */,
+				8048E4B81CD9467700676C4F /* util.js in Copy System Library */,
+				8048E4B91CD9467700676C4F /* random.js in Copy System Library */,
+				8048E4BA1CD9467700676C4F /* console.js in Copy System Library */,
+			);
+			name = "Copy System Library";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -136,11 +159,10 @@
 		800BC4181CD75A5700C74F2C /* engine.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = engine.js; sourceTree = "<group>"; };
 		800BC41A1CD75A8900C74F2C /* vm_api.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vm_api.cpp; sourceTree = "<group>"; };
 		800BC41B1CD75A8900C74F2C /* vm_api.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vm_api.hpp; sourceTree = "<group>"; };
-		800BC41E1CD75E3C00C74F2C /* console_api.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = console_api.cpp; sourceTree = "<group>"; };
-		800BC41F1CD75E3C00C74F2C /* console_api.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = console_api.hpp; sourceTree = "<group>"; };
 		800BC4261CD77AC400C74F2C /* main.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = main.js; sourceTree = "<group>"; };
 		8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spherefs.cpp; sourceTree = "<group>"; };
 		8048E4AE1CD7CD1B00676C4F /* spherefs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = spherefs.hpp; sourceTree = "<group>"; };
+		8048E4B11CD9407900676C4F /* console.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = console.js; sourceTree = "<group>"; };
 		808966E91CD7C2210099FF06 /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
 		808966EA1CD7C2210099FF06 /* util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = util.hpp; sourceTree = "<group>"; };
 		80FD9A501CD7B52600D27F9D /* test.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = test.js; sourceTree = "<group>"; };
@@ -273,8 +295,6 @@
 			children = (
 				800BC41A1CD75A8900C74F2C /* vm_api.cpp */,
 				800BC41B1CD75A8900C74F2C /* vm_api.hpp */,
-				800BC41E1CD75E3C00C74F2C /* console_api.cpp */,
-				800BC41F1CD75E3C00C74F2C /* console_api.hpp */,
 			);
 			name = Native;
 			path = src/lib_native;
@@ -289,6 +309,7 @@
 				800BC3F81CCFF51A00C74F2C /* assert.js */,
 				800BC3FA1CD01CD000C74F2C /* util.js */,
 				800BC3FC1CD6317900C74F2C /* random.js */,
+				8048E4B11CD9407900676C4F /* console.js */,
 			);
 			name = JavaScript;
 			path = lib;
@@ -365,7 +386,8 @@
 				800BC3871CCE362900C74F2C /* Resources */,
 				800BC3D11CCE380B00C74F2C /* Embed Frameworks */,
 				800BC3DF1CCE61CC00C74F2C /* Embed Libraries */,
-				800BC4221CD77A8F00C74F2C /* Copy Example code */,
+				800BC4221CD77A8F00C74F2C /* Copy Game */,
+				8048E4B31CD9466600676C4F /* Copy System Library */,
 			);
 			buildRules = (
 			);
@@ -421,6 +443,7 @@
 				800BC3FD1CD6317900C74F2C /* random.js in Resources */,
 				800BC3F91CCFF51A00C74F2C /* assert.js in Resources */,
 				800BC4191CD75A5700C74F2C /* engine.js in Resources */,
+				8048E4B21CD9407900676C4F /* console.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,7 +454,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				800BC4201CD75E3C00C74F2C /* console_api.cpp in Sources */,
 				800BC4121CD667BD00C74F2C /* module.cpp in Sources */,
 				808966EB1CD7C2210099FF06 /* util.cpp in Sources */,
 				800BC41C1CD75A8900C74F2C /* vm_api.cpp in Sources */,
@@ -446,7 +468,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				800BC4211CD75E3C00C74F2C /* console_api.cpp in Sources */,
 				800BC4131CD667BD00C74F2C /* module.cpp in Sources */,
 				808966EC1CD7C2210099FF06 /* util.cpp in Sources */,
 				800BC41D1CD75A8900C74F2C /* vm_api.cpp in Sources */,

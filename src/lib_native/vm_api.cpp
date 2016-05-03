@@ -32,8 +32,28 @@ bool api_vm_get_extensions(JSContext *context, uint argc, JS::Value *vp) {
     return true;
 }
 
+bool api_vm_print(JSContext *context, uint argc, JS::Value *vp) {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
+    if (args.length() != 1) {
+        return true;
+    }
+
+    JS::RootedString jsString(context, args.get(0).toString());
+
+    char *value = JS_EncodeStringToUTF8(context, jsString);
+    if(value) {
+        printf("%s", value);
+
+        JS_free(context, value);
+    }
+    
+    return true;
+}
+
 static const JSFunctionSpec vmFunctions[] = {
     JS_FS("get_extensions", api_vm_get_extensions, 1, 0),
+    JS_FS("print", api_vm_print, 1, 0),
     JS_FS_END
 };
 

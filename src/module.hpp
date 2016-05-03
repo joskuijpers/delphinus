@@ -32,7 +32,7 @@ class Module : public std::enable_shared_from_this<Module> {
     Runtime *runtime;
 
 public:
-    Module(Runtime *runtime, std::string moduleId, std::string path);
+    Module(Runtime *runt, std::string moduleId, std::string path);
     ~Module();
 
     bool loadIntoRuntime();
@@ -58,5 +58,8 @@ public:
 
 void moduleCache_create();
 void moduleCache_dispose();
+
+/// Require from the runtime, to load system modules
+JSObject *runtime_require(Runtime *runtime, std::string moduleId);
 
 }
