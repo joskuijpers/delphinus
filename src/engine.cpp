@@ -13,8 +13,6 @@
 
 #include <SDL2/SDL.h>
 
-#include "spherefs.hpp"
-
 void printEvent(const SDL_Event *);
 
 using namespace delphinus;
@@ -40,18 +38,7 @@ Engine::~Engine() {
 }
 
 int Engine::run() {
-
-    Sandbox *sandbox = new Sandbox();
-
-    Path p("tools.js");
-    File *f = sandbox->open(p, "r");
-
-    LOG("File %p, path %s", f, sandbox->resolve(p).c_str());
-
-    delete sandbox;
-
-
-//    runtime->run();
+    runtime->run();
 /*
     bool running = true;
 

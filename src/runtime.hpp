@@ -13,6 +13,8 @@
 #include "types.hpp"
 #include <jsapi.h>
 
+#include "spherefs.hpp"
+
 namespace delphinus {
 
 class Runtime : public std::enable_shared_from_this<Runtime> {
@@ -20,11 +22,14 @@ public:
     JSRuntime *runtime;
     JSContext *context;
 
+    Sandbox *sandbox;
 public:
     Runtime();
     ~Runtime();
 
     void run();
+
+    Sandbox *getSandbox();
 
     static Runtime *getCurrent(JSContext *context);
 };

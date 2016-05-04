@@ -37,10 +37,13 @@ delphinus::Runtime::Runtime() {
     if (context == nullptr)
         FATAL("Could not create JS context");
 
-    delphinus::moduleCache_create();
+    moduleCache_create();
+
+    sandbox = new Sandbox();
 }
 
 delphinus::Runtime::~Runtime() {
+    delete sandbox;
     delphinus::moduleCache_dispose();
 
     JS_DestroyContextNoGC(context);
@@ -54,6 +57,33 @@ delphinus::Runtime *delphinus::Runtime::getCurrent(JSContext *context) {
 }
 
 void delphinus::Runtime::run() {
+    /*std::vector<Path> paths;
+
+    paths.push_back(Path("tools.js"));
+    paths.push_back(Path("/tools.js"));
+    paths.push_back(Path("a//tools.js"));
+
+    paths.push_back(Path("./tools.js"));
+    paths.push_back(Path("hello/tools.js"));
+    paths.push_back(Path("~usr/savefile.json"));
+    paths.push_back(Path("~sys/scripts/fiel"));
+    paths.push_back(Path("packages/link/link.js"));
+    paths.push_back(Path("packages/link/../link/link.js"));
+    paths.push_back(Path("../link/link.js"));
+    paths.push_back(Path("link/./lala.js"));
+
+    paths.push_back(Path("~sys/../test.js"));
+
+    paths.push_back(Path("scripts/hello", "./file.js"));
+    paths.push_back(Path("scripts/hello", "../file/file.js"));
+
+    for (size_t i = 0; i < paths.size(); ++i) {
+        Path p = paths[i];
+        if (p.isValid()) {
+            LOG("FSPath %s => %s", p.getString().c_str(), sandbox->resolve(p).c_str());
+        }
+    }*/
+
     // Load main module
     Module *mainModule = new Module(this, "main", std::string(SDL_GetBasePath()) + "game/main.js");
 

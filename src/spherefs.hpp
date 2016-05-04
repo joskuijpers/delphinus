@@ -19,6 +19,7 @@ namespace delphinus {
     class Sandbox;
 
 typedef enum {
+    INVALID,
     SYSTEM, // ~sys/
     GAME, // *
     USER, // ~usr/
@@ -27,13 +28,18 @@ typedef enum {
 
 // SFS path: inside the sandbox
 class Path {
+    friend Sandbox;
+    
     std::vector<std::string> elements;
-    path_type_t type;
+    path_type_t type = INVALID;
 
 public:
     Path(std::string base_dir, std::string name);
     Path(std::string path);
-    ~Path();
+
+    inline bool isValid() {
+        return type != INVALID;
+    }
 
     /**
      * Get the SFS path string.

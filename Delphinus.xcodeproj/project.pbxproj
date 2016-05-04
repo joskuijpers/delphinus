@@ -28,9 +28,6 @@
 		800BC3E41CCE6CB100C74F2C /* libmozjs-45.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC3E31CCE6CB100C74F2C /* libmozjs-45.dylib */; };
 		800BC3E51CCE6CB100C74F2C /* libmozjs-45.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 800BC3E31CCE6CB100C74F2C /* libmozjs-45.dylib */; };
 		800BC3E61CCE6EFD00C74F2C /* libmozjs-45.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 800BC3E31CCE6CB100C74F2C /* libmozjs-45.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		800BC3F91CCFF51A00C74F2C /* assert.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC3F81CCFF51A00C74F2C /* assert.js */; };
-		800BC3FB1CD01CD000C74F2C /* util.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC3FA1CD01CD000C74F2C /* util.js */; };
-		800BC3FD1CD6317900C74F2C /* random.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC3FC1CD6317900C74F2C /* random.js */; };
 		800BC4021CD6458500C74F2C /* engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC4001CD6458500C74F2C /* engine.cpp */; };
 		800BC4031CD6458500C74F2C /* engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC4001CD6458500C74F2C /* engine.cpp */; };
 		800BC4061CD652E100C74F2C /* window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC4041CD652E100C74F2C /* window.cpp */; };
@@ -39,13 +36,11 @@
 		800BC40F1CD6679E00C74F2C /* runtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC40C1CD6679E00C74F2C /* runtime.cpp */; };
 		800BC4121CD667BD00C74F2C /* module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC4101CD667BD00C74F2C /* module.cpp */; };
 		800BC4131CD667BD00C74F2C /* module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC4101CD667BD00C74F2C /* module.cpp */; };
-		800BC4191CD75A5700C74F2C /* engine.js in Resources */ = {isa = PBXBuildFile; fileRef = 800BC4181CD75A5700C74F2C /* engine.js */; };
 		800BC41C1CD75A8900C74F2C /* vm_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41A1CD75A8900C74F2C /* vm_api.cpp */; };
 		800BC41D1CD75A8900C74F2C /* vm_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41A1CD75A8900C74F2C /* vm_api.cpp */; };
 		800BC4271CD77AD700C74F2C /* main.js in Copy Game */ = {isa = PBXBuildFile; fileRef = 800BC4261CD77AC400C74F2C /* main.js */; };
 		8048E4AF1CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
 		8048E4B01CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
-		8048E4B21CD9407900676C4F /* console.js in Resources */ = {isa = PBXBuildFile; fileRef = 8048E4B11CD9407900676C4F /* console.js */; };
 		8048E4B41CD9467700676C4F /* Promise.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3E81CCE91E300C74F2C /* Promise.js */; };
 		8048E4B51CD9467700676C4F /* async.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3F71CCFC17900C74F2C /* async.js */; };
 		8048E4B61CD9467700676C4F /* engine.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC4181CD75A5700C74F2C /* engine.js */; };
@@ -439,11 +434,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				800BC3FB1CD01CD000C74F2C /* util.js in Resources */,
-				800BC3FD1CD6317900C74F2C /* random.js in Resources */,
-				800BC3F91CCFF51A00C74F2C /* assert.js in Resources */,
-				800BC4191CD75A5700C74F2C /* engine.js in Resources */,
-				8048E4B21CD9407900676C4F /* console.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

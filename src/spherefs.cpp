@@ -9,6 +9,7 @@
 #include "spherefs.hpp"
 #include "types.hpp"
 #include "macros.hpp"
+#include "util.hpp"
 
 #include <cassert>
 
@@ -28,26 +29,93 @@ Path::Path(std::string path) {
 }
 
 void Path::constructPath(std::string path) {
-    // Split at /
-    // If first element == ~sys then SYSTEM (remove 1)
-    // Else if first element == ~usr/ then USER (remove 1)
-    // ELse if first character in path == / THEN absolute (remove 0)
-    // ELse if first element == . || ..: invalid (should have used base_dir)
-    // Else GAME (remove)
+    size_t i = 0;
+    std::vector<std::string> elems = split(path, '/');
 
-    // NORMALIZE
-    // Loop over elements
-    // Remove any empty ones
-    // if i+1 < length && i+1 == .., remove i and i+1.
-}
+    // Determine the type using the prefix
+    if (path.find("/") == 0) {
+        type = ABSOLUTE;
+        i += 1;
+    } else if (path.find("~usr/") == 0) {
+        type = USER;
+        i += 1;
+    } else if (path.find("~sys/") == 0) {
+        type = SYSTEM;
+        i += 1;
+    } else {
+        type = GAME;
+    }
 
-Path::~Path() {
+    // Normalize and find path properties. This is the only place
+    // where we can 'remove' elements (by not adding them to the final
+    // vector).
+    for(; i < elems.size(); ++i) {
+        std::string elem = elems[i];
+
+        // Remove empty elements
+        if (elem.length() == 0) {
+            continue;
+        }
+
+        // Find invalid path components
+        if (elem.length() == 4 && (elem.compare("~sys") == 0 || elem.compare("~usr") == 0)) {
+            type = INVALID;
+            return;
+        }
+
+        // If next element is .., skip this and next element.
+        if (i + 1 < elems.size() && elems[i+1] == "..") {
+            i += 1;
+            continue;
+        }
+
+        // All .. should have been removed by above statement
+        if (elems[i] == "..") {
+            type = INVALID;
+            return;
+        }
+
+        // . operators are skipped, but if at start path is invalid
+        if (elems[i] == ".") {
+            if (i == 0) {
+                type = INVALID;
+                return;
+            }
+            continue;
+        }
+
+        if (elem.find("\\") != std::string::npos) {
+            type = INVALID;
+            return;
+        }
+
+        elements.push_back(elem);
+    }
 }
 
 std::string Path::getString() {
-    // Add prefix
-    // Join elements with '/'
-    return "";
+    std::string prefix, path;
+
+    switch (type) {
+        case INVALID:
+            return nullptr;
+        case SYSTEM:
+            prefix = "~sys/";
+            break;
+        case GAME:
+            prefix = "";
+            break;
+        case USER:
+            prefix = "~usr/";
+            break;
+        case ABSOLUTE:
+            prefix = "/";
+            break;
+    }
+
+    path = join(elements, '/');
+
+    return prefix + path;
 }
 
 bool Path::hasExtension(std::string extension) {
@@ -65,8 +133,6 @@ bool Path::isRooted() {
 #pragma mark - Sandbox
 
 Sandbox::Sandbox() {
-    LOG("Create a sandbox");
-
     const char *path = SDL_GetBasePath();
     basePath = std::string(path);
     SDL_free((void *)path);
@@ -81,7 +147,24 @@ bool Sandbox::containsPath(std::string nativePath) {
 }
 
 std::string Sandbox::resolve(Path path) {
-    return "<APATH>";
+    std::string subPath, rootPath;
+
+    if (!path.isValid())
+        return nullptr;
+
+    subPath = join(path.elements, '/');
+
+    if (path.type == SYSTEM) {
+        rootPath = basePath + "system/";
+    } else if (path.type == GAME) {
+        rootPath = basePath + "game/";
+    } else if (path.type == USER) {
+        rootPath = prefPath;
+    } else if (path.type == ABSOLUTE) {
+        rootPath = "/";
+    }
+
+    return rootPath + subPath;
 }
 
 File *Sandbox::open(Path path, std::string mode) {
