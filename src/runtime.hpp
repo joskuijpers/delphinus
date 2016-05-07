@@ -29,7 +29,9 @@ public:
 
     void run();
 
-    Sandbox *getSandbox();
+    inline Sandbox *getSandbox() {
+        return sandbox;
+    }
 
     static Runtime *getCurrent(JSContext *context);
 };

@@ -38,7 +38,6 @@
 		800BC4131CD667BD00C74F2C /* module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC4101CD667BD00C74F2C /* module.cpp */; };
 		800BC41C1CD75A8900C74F2C /* vm_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41A1CD75A8900C74F2C /* vm_api.cpp */; };
 		800BC41D1CD75A8900C74F2C /* vm_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 800BC41A1CD75A8900C74F2C /* vm_api.cpp */; };
-		800BC4271CD77AD700C74F2C /* main.js in Copy Game */ = {isa = PBXBuildFile; fileRef = 800BC4261CD77AC400C74F2C /* main.js */; };
 		8048E4AF1CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
 		8048E4B01CD7CD1B00676C4F /* spherefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */; };
 		8048E4B41CD9467700676C4F /* Promise.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 800BC3E81CCE91E300C74F2C /* Promise.js */; };
@@ -50,7 +49,10 @@
 		8048E4BA1CD9467700676C4F /* console.js in Copy System Library */ = {isa = PBXBuildFile; fileRef = 8048E4B11CD9407900676C4F /* console.js */; };
 		808966EB1CD7C2210099FF06 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 808966E91CD7C2210099FF06 /* util.cpp */; };
 		808966EC1CD7C2210099FF06 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 808966E91CD7C2210099FF06 /* util.cpp */; };
-		80FD9A511CD7B52700D27F9D /* test.js in Copy Game */ = {isa = PBXBuildFile; fileRef = 80FD9A501CD7B52600D27F9D /* test.js */; };
+		80E389381CDCF5E700CE5DDD /* foo in Copy Game */ = {isa = PBXBuildFile; fileRef = 80E389341CDCF5E100CE5DDD /* foo */; };
+		80E389391CDCF5E700CE5DDD /* main.js in Copy Game */ = {isa = PBXBuildFile; fileRef = 80E389351CDCF5E100CE5DDD /* main.js */; };
+		80E3893A1CDCF5E700CE5DDD /* packages in Copy Game */ = {isa = PBXBuildFile; fileRef = 80E389361CDCF5E100CE5DDD /* packages */; };
+		80E3893B1CDCF5E700CE5DDD /* test.js in Copy Game */ = {isa = PBXBuildFile; fileRef = 80E389371CDCF5E100CE5DDD /* test.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -96,8 +98,10 @@
 			dstPath = game;
 			dstSubfolderSpec = 7;
 			files = (
-				800BC4271CD77AD700C74F2C /* main.js in Copy Game */,
-				80FD9A511CD7B52700D27F9D /* test.js in Copy Game */,
+				80E389381CDCF5E700CE5DDD /* foo in Copy Game */,
+				80E389391CDCF5E700CE5DDD /* main.js in Copy Game */,
+				80E3893A1CDCF5E700CE5DDD /* packages in Copy Game */,
+				80E3893B1CDCF5E700CE5DDD /* test.js in Copy Game */,
 			);
 			name = "Copy Game";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -154,13 +158,15 @@
 		800BC4181CD75A5700C74F2C /* engine.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = engine.js; sourceTree = "<group>"; };
 		800BC41A1CD75A8900C74F2C /* vm_api.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vm_api.cpp; sourceTree = "<group>"; };
 		800BC41B1CD75A8900C74F2C /* vm_api.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = vm_api.hpp; sourceTree = "<group>"; };
-		800BC4261CD77AC400C74F2C /* main.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = main.js; sourceTree = "<group>"; };
 		8048E4AD1CD7CD1B00676C4F /* spherefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spherefs.cpp; sourceTree = "<group>"; };
 		8048E4AE1CD7CD1B00676C4F /* spherefs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = spherefs.hpp; sourceTree = "<group>"; };
 		8048E4B11CD9407900676C4F /* console.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = console.js; sourceTree = "<group>"; };
 		808966E91CD7C2210099FF06 /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
 		808966EA1CD7C2210099FF06 /* util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = util.hpp; sourceTree = "<group>"; };
-		80FD9A501CD7B52600D27F9D /* test.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = test.js; sourceTree = "<group>"; };
+		80E389341CDCF5E100CE5DDD /* foo */ = {isa = PBXFileReference; lastKnownFileType = folder; path = foo; sourceTree = "<group>"; };
+		80E389351CDCF5E100CE5DDD /* main.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = main.js; sourceTree = "<group>"; };
+		80E389361CDCF5E100CE5DDD /* packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = packages; sourceTree = "<group>"; };
+		80E389371CDCF5E100CE5DDD /* test.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = test.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -335,8 +341,10 @@
 		800BC4251CD77AC400C74F2C /* simple */ = {
 			isa = PBXGroup;
 			children = (
-				800BC4261CD77AC400C74F2C /* main.js */,
-				80FD9A501CD7B52600D27F9D /* test.js */,
+				80E389341CDCF5E100CE5DDD /* foo */,
+				80E389351CDCF5E100CE5DDD /* main.js */,
+				80E389361CDCF5E100CE5DDD /* packages */,
+				80E389371CDCF5E100CE5DDD /* test.js */,
 			);
 			path = simple;
 			sourceTree = "<group>";

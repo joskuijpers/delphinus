@@ -85,7 +85,7 @@ void delphinus::Runtime::run() {
     }*/
 
     // Load main module
-    Module *mainModule = new Module(this, "main", std::string(SDL_GetBasePath()) + "game/main.js");
+    Module *mainModule = new Module(this, "main.js");
 
     mainModule->loadIntoRuntime();
 

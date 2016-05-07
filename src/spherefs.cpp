@@ -12,6 +12,9 @@
 #include "util.hpp"
 
 #include <cassert>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
 
 #include <SDL2/SDL_rwops.h>
 #include <SDL2/SDL_filesystem.h>
@@ -21,11 +24,34 @@ using namespace delphinus;
 #pragma mark - Path
 
 Path::Path(std::string base_dir, std::string name) {
-    constructPath(base_dir + "/" + name);
+    std::string path = base_dir;
+    if (path.length() == 0) {
+        path = name;
+    } else {
+        path += "/" + name;
+    }
+
+    constructPath(path);
 }
 
 Path::Path(std::string path) {
     constructPath(path);
+}
+
+Path::Path(Path base_dir, std::string name) {
+    std::string path = base_dir.getString();
+    if (path.length() == 0) {
+        path = name;
+    } else {
+        path += "/" + name;
+    }
+
+    constructPath(path);
+}
+
+Path::Path(std::vector<std::string> elements) {
+    // Could just set elements but that is unsafe
+    constructPath(join(elements, '/'));
 }
 
 void Path::constructPath(std::string path) {
@@ -59,6 +85,7 @@ void Path::constructPath(std::string path) {
 
         // Find invalid path components
         if (elem.length() == 4 && (elem.compare("~sys") == 0 || elem.compare("~usr") == 0)) {
+            LOG("Path '%s' is invalid: found prefixes mid-text", path.c_str());
             type = INVALID;
             return;
         }
@@ -71,20 +98,18 @@ void Path::constructPath(std::string path) {
 
         // All .. should have been removed by above statement
         if (elems[i] == "..") {
+            LOG("Path '%s' is invalid: invalid .. element", path.c_str());
             type = INVALID;
             return;
         }
 
-        // . operators are skipped, but if at start path is invalid
+        // . operators are skipped. If at start of path, assume root is ""
         if (elems[i] == ".") {
-            if (i == 0) {
-                type = INVALID;
-                return;
-            }
             continue;
         }
 
         if (elem.find("\\") != std::string::npos) {
+            LOG("Path '%s' is invalid: no support for Windows paths", path.c_str());
             type = INVALID;
             return;
         }
@@ -122,12 +147,20 @@ bool Path::hasExtension(std::string extension) {
     return false;
 }
 
-bool Path::isFile() {
-    return false;
+std::string Path::getBasename() {
+    assert(isValid());
+
+    if (elements.size() > 0)
+        return elements[elements.size() - 1];
+    return "";
 }
 
-bool Path::isRooted() {
-    return false;
+Path Path::getDirname() {
+    std::string basename = getBasename();
+    std::string path = getString();
+    path = path.substr(0, path.length() - basename.length());
+
+    return Path(path);
 }
 
 #pragma mark - Sandbox
@@ -143,14 +176,16 @@ Sandbox::Sandbox() {
 }
 
 bool Sandbox::containsPath(std::string nativePath) {
+    if (nativePath.find(basePath) == 0 || nativePath.find(prefPath) == 0) {
+        return true;
+    }
     return false;
 }
 
 std::string Sandbox::resolve(Path path) {
     std::string subPath, rootPath;
 
-    if (!path.isValid())
-        return nullptr;
+    assert(path.isValid());
 
     subPath = join(path.elements, '/');
 
@@ -168,12 +203,66 @@ std::string Sandbox::resolve(Path path) {
 }
 
 File *Sandbox::open(Path path, std::string mode) {
-    std::string resPath = resolve(path);
+    std::string resPath;
+    assert(path.isValid());
+
+    resPath = resolve(path);
     if (resPath.length() < 1) {
         return nullptr;
     }
 
     return new File(resPath, mode);
+}
+
+bool Sandbox::exists(Path path) {
+    struct stat buffer;
+    std::string osPath = resolve(path);
+
+    return stat(osPath.c_str(), &buffer) == 0;
+}
+
+bool Sandbox::isFile(Path path) {
+    struct stat buffer;
+    std::string osPath = resolve(path);
+
+    if (stat(osPath.c_str(), &buffer) < 0) {
+        return false;
+    }
+
+    return S_ISREG(buffer.st_mode);
+}
+
+bool Sandbox::isDirectory(Path path) {
+    struct stat buffer;
+    std::string osPath = resolve(path);
+
+    if (stat(osPath.c_str(), &buffer) < 0) {
+        return false;
+    }
+
+    return S_ISDIR(buffer.st_mode);
+}
+
+std::vector<Sandbox::ListEntry> Sandbox::list(Path path) {
+    std::string osPath = resolve(path);
+    std::vector<Sandbox::ListEntry> entries;
+
+    DIR *dir;
+    struct dirent *ent;
+
+    if ((dir = opendir(osPath.c_str())) != nullptr) {
+        while ((ent = readdir(dir)) != nullptr) {
+            std::string name(ent->d_name);
+            if (ent->d_type == DT_DIR) {
+                entries.push_back(Sandbox::ListEntry(Path(path, name + "/"), true));
+            } else if (ent->d_type == DT_REG) {
+                entries.push_back(Sandbox::ListEntry(Path(path, name), false));
+            }
+        }
+        closedir(dir);
+    }
+
+    return entries;
 }
 
 #pragma mark - File

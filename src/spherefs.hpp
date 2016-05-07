@@ -15,8 +15,8 @@
 
 namespace delphinus {
 
-    class File;
-    class Sandbox;
+class File;
+class Sandbox;
 
 typedef enum {
     INVALID,
@@ -31,14 +31,21 @@ class Path {
     friend Sandbox;
     
     std::vector<std::string> elements;
+public:
     path_type_t type = INVALID;
 
 public:
     Path(std::string base_dir, std::string name);
+    Path(Path base_dir, std::string path);
     Path(std::string path);
+    Path(std::vector<std::string> elements);
 
     inline bool isValid() {
         return type != INVALID;
+    }
+
+    inline bool isRoot() {
+        return elements.size() == 0 && type != ABSOLUTE;
     }
 
     /**
@@ -46,11 +53,15 @@ public:
      */
     std::string getString();
 
-    bool hasExtension(std::string extension);
-    bool isFile();
-    bool isRooted();
+    inline std::vector<std::string> getElements() {
+        return elements;
+    }
 
-    // append, append_dir
+    bool hasExtension(std::string extension);
+
+    std::string getBasename();
+    Path getDirname();
+
     // compare (== operator)
 
 private:
@@ -80,7 +91,22 @@ public:
      * Open a file in the sandbox
      */
     File *open(Path path, std::string mode);
-//        exists(Path)
+
+    /**
+     * Geth whether path exists.
+     */
+    bool exists(Path path);
+
+    /**
+     * Geth whether path exists and is file.
+     */
+    bool isFile(Path path);
+
+    /**
+     * Geth whether path exists and is directory.
+     */
+    bool isDirectory(Path path);
+
 //        std::string slurp(Path)
 //        byte *slurp(Path, out_size)
 //        spew(Path, buf, size)
@@ -88,6 +114,21 @@ public:
 //        mkdir(Path)
 //        rmdir(Path)
 //        rename(Path, Path)
+
+    class ListEntry {
+        friend Sandbox;
+
+        bool directory;
+        Path path;
+
+        ListEntry(Path _path, bool dir) : path(_path), directory(dir) {}
+    public:
+        inline bool isDirectory() { return directory; }
+        inline bool isFile() { return !directory; }
+        inline Path getPath() { return path; }
+    };
+
+    std::vector<ListEntry> list(Path path);
 
 private:
 //        resolve(Path) // resolve Sandboxed path to real path

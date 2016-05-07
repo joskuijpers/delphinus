@@ -11,6 +11,7 @@
 #include "runtime.hpp"
 #include "util.hpp"
 #include "vm_api.hpp"
+#include "spherefs.hpp"
 
 #include <cassert>
 #include <forward_list>
@@ -29,7 +30,7 @@ static JSClass moduleScopeClass = {
 };
 
 static JSClass moduleClass = {
-    "Module", 0
+    "Module", JSCLASS_HAS_PRIVATE
 };
 
 static bool ModuleObject(JSContext *context, uint argc, JS::Value *vp) {
@@ -38,16 +39,7 @@ static bool ModuleObject(JSContext *context, uint argc, JS::Value *vp) {
 
 #pragma mark - Module Class
 
-Module::Module(Runtime *runt, std::string moduleId, std::string path) {
-    size_t splitPos = path.rfind("/");
-    if (splitPos == std::string::npos) {
-        _filename = path;
-        _directory = "";
-    } else {
-        _filename = path.substr(splitPos + 1);
-        _directory = path.substr(0, splitPos);
-    }
-
+Module::Module(Runtime *runt, std::string moduleId) {
     name = moduleId;
     runtime = runt;
 
@@ -58,10 +50,8 @@ Module::~Module() {
     JS_RemoveExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
 }
 
-// TODO: make an actual safe method... this sucks.
-// Resolve to having to ..
 std::string Module::getScriptPath() {
-    return _directory + "/" + _filename;
+    return runtime->sandbox->resolve(Path(name));
 }
 
 std::string Module::getModuleId() {
@@ -90,9 +80,9 @@ bool Module::addGlobals(JSContext *context, JS::HandleObject moduleScope) {
     // These two are globals are thus loaded for every module. To prevent cyclic dependency,
     // only load it if both are not available. This does mean 'engine' can't use console.log.
     // It will have to reside with __delphinus.print.
-    if (name != "engine" && name != "console") {
+    if (name != "~sys/engine.js" && name != "~sys/console.js") {
         // Add console object
-        JS::RootedObject consoleExports(context, runtime_require(runtime, "console"));
+        JS::RootedObject consoleExports(context, runtime_require(runtime, "~sys/console.js"));
         if (consoleExports == nullptr) {
             LOG("Failed to load console system module");
             return false;
@@ -104,7 +94,7 @@ bool Module::addGlobals(JSContext *context, JS::HandleObject moduleScope) {
         }
 
         // Add engine object
-        JS::RootedObject engineExports(context, runtime_require(runtime, "engine"));
+        JS::RootedObject engineExports(context, runtime_require(runtime, "~sys/engine.js"));
         if (engineExports == nullptr) {
             LOG("Failed to load engine system module");
             return false;
@@ -143,7 +133,7 @@ bool Module::loadIntoRuntime() {
     addGlobals(context, moduleScope);
 
     // Add __dirname and __filename properties
-    DPH_JS_STRING(__dirname, _directory.c_str())
+    DPH_JS_STRING(__dirname, Path(name).getDirname().getString().c_str())
     if(!JS_DefineProperty(context, moduleScope,
                           "__dirname", __dirname,
                           JSPROP_ENREPE)) {
@@ -151,7 +141,7 @@ bool Module::loadIntoRuntime() {
         return false;
     }
 
-    DPH_JS_STRING(__filename, _filename.c_str());
+    DPH_JS_STRING(__filename, Path(name).getBasename().c_str());
     if (!JS_DefineProperty(context, moduleScope,
                            "__filename", __filename,
                            JSPROP_ENREPE)) {
@@ -170,6 +160,7 @@ bool Module::loadIntoRuntime() {
         return false;
     }
 
+    // Add require.resolve
     if(!JS_DefineFunction(context, require,
                           "resolve", &api_resolve, 1,
                           JSPROP_ENREPE)) {
@@ -185,8 +176,6 @@ bool Module::loadIntoRuntime() {
         LOG("Failed to define 'require.main'");
         return false;
     }
-
-    //    JS_SetPrivate(require.get(), (void *)this);
 
     // Add exports and module properties
     exports = JS_NewPlainObject(context);
@@ -213,6 +202,9 @@ bool Module::loadIntoRuntime() {
         LOG("Failed to define 'module");
         return false;
     }
+
+    // Add module reference to this
+    JS_SetPrivate(moduleObj.get(), (void *)this);
 
     // Add 'module.id'
     DPH_JS_STRING(moduleId, name.c_str());
@@ -261,21 +253,150 @@ void Module::module_trace_func(JSTracer *tracer, void *data) {
 
 #pragma mark - Resolver
 
-std::string resolveModuleId(std::string moduleId) {
-    std::string path = std::string(SDL_GetBasePath()) + "system/" + moduleId + ".js";
+bool module_isCoreModule(std::string moduleId) {
+    if (   moduleId == "assert"
+        || moduleId == "util"
+        || moduleId == "random") {
+        return true;
+    }
 
-    LOG("require('%s') called. Resolved to %s", moduleId.c_str(), path.c_str());
+    return false;
+}
 
-    return path;
+bool module_resolveAsFile(Runtime *runtime, Path path, std::string &moduleId) {
+    if (!path.isValid()) {
+        return false;
+    }
+
+    // Try without .js added
+    if (runtime->getSandbox()->isFile(path)) {
+        moduleId = path.getString();
+        return true;
+    }
+
+    // Try with .js added
+    Path newPath = Path(path.getString() + ".js");
+    if (newPath.isValid() && runtime->getSandbox()->isFile(newPath)) {
+        moduleId = newPath.getString();
+        return true;
+    }
+
+    return false;
+}
+
+bool module_resolveAsDirectory(Runtime *runtime, Path path, std::string &moduleId) {
+    if (!path.isValid()) {
+        return false;
+    }
+
+    // If X/package.json is a file, load main field.
+    Path packageJson(path, "package.json");
+    if (runtime->getSandbox()->isFile(packageJson)) {
+        LOG("parse %s", packageJson.getString().c_str());
+
+        std::string mainField = "main.js";
+        Path mainPath(path, mainField);
+
+        return module_resolveAsFile(runtime, mainPath, moduleId);
+    }
+
+    // If X/index.js is a file, load
+    Path indexFile(path, "index.js");
+    if (runtime->getSandbox()->isFile(indexFile)) {
+        moduleId = indexFile.getString();
+        return true;
+    }
+
+    return false;
+}
+
+std::vector<Path> module_getPackagePaths(Runtime *runtime, Path basePath) {
+    std::vector<Path> paths;
+    std::vector<std::string> elements = basePath.getElements();
+
+    for (long i = elements.size() - 1; i >= 0; --i) {
+        // If we were in a packages folder, don't scan it.
+        if (elements[i] == "packages")
+            continue;
+
+        // Slice from 0-i.
+        std::vector<std::string> slice;
+        for (long j = 0; j <= i; ++j) {
+            slice.push_back(elements[j]);
+        }
+        slice.push_back("packages"); // Packages folder
+
+        // Create path and add it
+        Path dir(slice);
+        if (dir.isValid()) {
+            paths.push_back(dir);
+        }
+    }
+
+    // Also add root package module
+    paths.push_back(Path("packages"));
+
+    return paths;
+}
+
+bool module_resolveAsPackage(Runtime *runtime, std::string relModuleId, Path basePath, std::string &moduleId) {
+    if (!basePath.isValid()) {
+        return false;
+    }
+
+    // Get directories at nodeModPaths(basePath)
+    std::vector<Path> dirs = module_getPackagePaths(runtime, basePath);
+    for (auto it = dirs.begin(); it < dirs.end(); ++it) {
+        Path p(*it, relModuleId);
+
+        if (module_resolveAsFile(runtime, p, moduleId)) {
+            return true;
+        }
+
+        if (module_resolveAsDirectory(runtime, p, moduleId)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool module_resolveModuleId(Runtime *runtime, std::string relModuleId, Module *fromModule, std::string &moduleId) {
+    Path fromPath(fromModule->getModuleId());
+    Path fromDir = fromPath.getDirname();
+
+    // Lookup in cache the relModuleId + fromModule tuple
+
+    // If the module is a core module, resolve it.
+    if (module_isCoreModule(relModuleId)) {
+        moduleId = "~sys/" + relModuleId + ".js";
+        return true;
+    }
+
+    // If it is a relative module, try to find it
+    if (relModuleId.find("./") == 0 || relModuleId.find("../") == 0) {
+        if (module_resolveAsFile(runtime, Path(fromDir, relModuleId), moduleId)) {
+            return true;
+        }
+
+        if (module_resolveAsDirectory(runtime, Path(fromDir, relModuleId), moduleId)) {
+            return true;
+        }
+    }
+
+    // Try the packages folder
+    else if (module_resolveAsPackage(runtime, relModuleId, fromDir, moduleId)) {
+        return true;
+    }
+
+    JS_ReportError(runtime->context, "Cannot find module '%s'", relModuleId.c_str());
+
+    return false;
 }
 
 #pragma mark - Module Cache
 
 static std::unique_ptr<ModuleCache> g_moduleCache = nullptr;
-
-ModuleCache::ModuleCache() {
-
-}
 
 ModuleCache::~ModuleCache() {
     list.clear();
@@ -311,32 +432,76 @@ void delphinus::moduleCache_dispose() {
 
 #pragma mark - API
 
+/**
+ * Get the module of the current global scope.
+ *
+ * @return Module pointer. Owned by the system. Do not free it, ever.
+ */
+Module *get_current_module(JSContext *context, JS::HandleObject global) {
+    // Get module object
+    JS::RootedValue moduleValue(context);
+    if (!JS_GetProperty(context, global, "module", &moduleValue)) {
+        return nullptr;
+    }
+
+    // Get private
+    if (!moduleValue.isObject()) {
+        return nullptr;
+    }
+
+    JS::RootedObject moduleObject(context);
+    if (!JS_ValueToObject(context, moduleValue, &moduleObject)) {
+        return nullptr;
+    }
+
+    return (Module *)JS_GetPrivate(moduleObject);
+}
+
 bool api_resolve(JSContext *context, uint argc, JS::Value *vp) {
+    std::string relModuleId;
+    Runtime *runtime;
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 
-    std::string module = stringFromValue(context, args.get(0));
-    std::string path = resolveModuleId(module);
+    // Find the global and acquire the current Module
+    JS::RootedObject global(context, JS_GetGlobalForObject(context, &args.callee()));
+    Module *fromModule = get_current_module(context, global);
 
-    args.rval().setString(JS_NewStringCopyZ(context, path.c_str()));
+    relModuleId = stringFromValue(context, args.get(0));
+    runtime = Runtime::getCurrent(context);
+
+    std::string moduleId;
+    if (!module_resolveModuleId(runtime, relModuleId, fromModule, moduleId))
+        return false;
+
+    args.rval().setString(JS_NewStringCopyZ(context, moduleId.c_str()));
     return true;
 }
 
 bool api_require(JSContext *context, uint argc, JS::Value *vp) {
-    std::string moduleId;
+    std::string relModuleId, moduleId;
     JS::CallArgs args;
     std::shared_ptr<Module> module;
+    Runtime *runtime;
 
     args = JS::CallArgsFromVp(argc, vp);
-    moduleId = stringFromValue(context, args.get(0)); // TODO: normalize
+
+    // Get the moduleId reqeuested
+    relModuleId = stringFromValue(context, args.get(0));
+
+    // Find the global and acquire the current Module
+    JS::RootedObject global(context, JS_GetGlobalForObject(context, &args.callee()));
+    Module *fromModule = get_current_module(context, global);
+
+    runtime = Runtime::getCurrent(context);
+
+    // Resolve it to a normalized path (which is also the moduleId)
+    if (!module_resolveModuleId(runtime, relModuleId, fromModule, moduleId)) {
+        return false;
+    }
 
     module = g_moduleCache->lookup(moduleId);
     if (module == nullptr) {
-        std::string path;
-        Runtime *runtime;
-
-        runtime = Runtime::getCurrent(context);
-        path = resolveModuleId(moduleId);
-        module = std::shared_ptr<Module>(new Module(runtime, moduleId, path));
+        module = std::shared_ptr<Module>(new Module(runtime, moduleId));
 
         if (!module->loadIntoRuntime())
             return false;
@@ -359,14 +524,13 @@ JSObject *delphinus::runtime_require(Runtime *runtime, std::string moduleId) {
     std::shared_ptr<Module> module;
     JSContext *context = runtime->context;
 
+    // This moduleId is always normalized
     module = g_moduleCache->lookup(moduleId);
     if (module == nullptr) {
-        std::string path;
         Runtime *runtime;
 
         runtime = Runtime::getCurrent(context);
-        path = resolveModuleId(moduleId);
-        module = std::shared_ptr<Module>(new Module(runtime, moduleId, path));
+        module = std::shared_ptr<Module>(new Module(runtime, moduleId));
 
         if (!module->loadIntoRuntime())
             return nullptr;

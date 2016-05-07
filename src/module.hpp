@@ -20,19 +20,16 @@ namespace delphinus {
 class Runtime;
 
 class Module : public std::enable_shared_from_this<Module> {
-    std::string name;
+    std::string name; // Also normalized SFS path
 
     JS::Heap<JSObject *> exports;
     JS::Heap<JSObject *> scope;
     JS::Heap<JSScript *> script;
 
-    std::string _filename;
-    std::string _directory;
-
     Runtime *runtime;
 
 public:
-    Module(Runtime *runt, std::string moduleId, std::string path);
+    Module(Runtime *runt, std::string moduleId);
     ~Module();
 
     bool loadIntoRuntime();
@@ -49,7 +46,7 @@ class ModuleCache {
     std::forward_list<std::shared_ptr<Module>> list;
 
 public:
-    ModuleCache();
+    ModuleCache() {};
     ~ModuleCache();
 
     std::shared_ptr<Module> lookup(std::string moduleId);
@@ -59,7 +56,7 @@ public:
 void moduleCache_create();
 void moduleCache_dispose();
 
-/// Require from the runtime, to load system modules
+/// Require from the runtime, to load system modules. moduleId must be normalized
 JSObject *runtime_require(Runtime *runtime, std::string moduleId);
 
 }
