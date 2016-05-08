@@ -13,6 +13,9 @@ let x = require("./test");
 console.log("Added 1 and 2: " + x.foo(1,2));
 console.log("The extensions: %s", engine.extensions);
 
+const assert = require("assert");
+
+assert.isEqual(1,2);
 
 /*
 let running = true;
