@@ -11,9 +11,10 @@
 #include <string>
 #include <memory>
 #include <forward_list>
-
 #include <jsapi.h>
+
 #include "types.hpp"
+#include "spherefs.hpp"
 
 namespace delphinus {
 
@@ -51,6 +52,31 @@ public:
 
     std::shared_ptr<Module> lookup(std::string moduleId);
     void add(std::shared_ptr<Module> module);
+};
+
+class Package {
+    Path packagePath;
+    std::string name;
+    std::string main;
+    bool loaded;
+
+public:
+    Package();
+
+    /// Use with path of the package, not the package.json
+    bool load(Runtime *runtime, Path path);
+
+    inline std::string getName() {
+        return name;
+    }
+
+    inline std::string getMain() {
+        return main;
+    }
+
+    inline Path getMainPath() {
+        return Path(packagePath, main);
+    }
 };
 
 void moduleCache_create();

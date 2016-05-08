@@ -292,12 +292,11 @@ bool module_resolveAsDirectory(Runtime *runtime, Path path, std::string &moduleI
     // If X/package.json is a file, load main field.
     Path packageJson(path, "package.json");
     if (runtime->getSandbox()->isFile(packageJson)) {
-        LOG("parse %s", packageJson.getString().c_str());
+        Package package;
 
-        std::string mainField = "main.js";
-        Path mainPath(path, mainField);
-
-        return module_resolveAsFile(runtime, mainPath, moduleId);
+        if (package.load(runtime, path)) {
+            return module_resolveAsFile(runtime, package.getMainPath(), moduleId);
+        }
     }
 
     // If X/index.js is a file, load
@@ -365,12 +364,16 @@ bool module_resolveModuleId(Runtime *runtime, std::string relModuleId, Module *f
     Path fromPath(fromModule->getModuleId());
     Path fromDir = fromPath.getDirname();
 
-    // Lookup in cache the relModuleId + fromModule tuple
-
     // If the module is a core module, resolve it.
     if (module_isCoreModule(relModuleId)) {
         moduleId = "~sys/" + relModuleId + ".js";
         return true;
+    }
+
+    // Disallow absolute paths per specs
+    if (relModuleId.find("/") == 0) {
+        JS_ReportError(runtime->context, "Require disallows loading outside sandbox");
+        return false;
     }
 
     // If it is a relative module, try to find it
@@ -545,4 +548,58 @@ JSObject *delphinus::runtime_require(Runtime *runtime, std::string moduleId) {
     }
 
     return exports.get();
+}
+
+#pragma mark - Packages
+
+Package::Package() {
+}
+
+bool Package::load(Runtime *runtime, Path path) {
+    assert(path.isValid());
+
+    std::string data;
+    packagePath = path;
+    Path jsonPath(packagePath, "package.json");
+
+    // Load file contents
+    if (!runtime->getSandbox()->slurp(jsonPath, data)) {
+        return false;
+    }
+
+    // Create result object
+    JSContext *context = runtime->context;
+    JS::RootedValue jsonValue(context);
+    JS::RootedObject jsonObject(context);
+
+    // Convert std string to JS string
+    JS::RootedString jsonData(context, JS_NewStringCopyN(context, data.c_str(), data.length()));
+
+    // Parse the json
+    if (!JS_ParseJSON(context, jsonData, &jsonValue)) {
+        return false;
+    }
+
+    // Transform value to object
+    if (!JS_ValueToObject(context, jsonValue, &jsonObject)) {
+        return false;
+    }
+
+    // Read main property
+    if (!JS_GetProperty(context, jsonObject, "main", &jsonValue)) {
+        LOG("Main property not found in package.json");
+        return false;
+    }
+    main = stringFromValue(context, jsonValue);
+
+    // Read name property
+    if (!JS_GetProperty(context, jsonObject, "name", &jsonValue)) {
+        LOG("Name property not found in package.json");
+        return false;
+    }
+    name = stringFromValue(context, jsonValue);
+
+    loaded = true;
+
+    return true;
 }

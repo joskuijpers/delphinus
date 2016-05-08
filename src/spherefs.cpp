@@ -23,6 +23,10 @@ using namespace delphinus;
 
 #pragma mark - Path
 
+Path::Path() {
+    type = INVALID;
+}
+
 Path::Path(std::string base_dir, std::string name) {
     std::string path = base_dir;
     if (path.length() == 0) {
@@ -85,7 +89,7 @@ void Path::constructPath(std::string path) {
 
         // Find invalid path components
         if (elem.length() == 4 && (elem.compare("~sys") == 0 || elem.compare("~usr") == 0)) {
-            LOG("Path '%s' is invalid: found prefixes mid-text", path.c_str());
+            error = "Path '" + path + "' is invalid: found prefixes mid-text";
             type = INVALID;
             return;
         }
@@ -98,7 +102,7 @@ void Path::constructPath(std::string path) {
 
         // All .. should have been removed by above statement
         if (elems[i] == "..") {
-            LOG("Path '%s' is invalid: invalid .. element", path.c_str());
+            error = "Path '" + path + "' is invalid: path resolved outside sandbox";
             type = INVALID;
             return;
         }
@@ -109,7 +113,7 @@ void Path::constructPath(std::string path) {
         }
 
         if (elem.find("\\") != std::string::npos) {
-            LOG("Path '%s' is invalid: no support for Windows paths", path.c_str());
+            error = "Path '" + path + "' is invalid: \\ characters are not supported";
             type = INVALID;
             return;
         }
@@ -265,6 +269,66 @@ std::vector<Sandbox::ListEntry> Sandbox::list(Path path) {
     return entries;
 }
 
+bool Sandbox::slurp(Path path, std::string& result) {
+    assert(path.isValid());
+
+    // Get file size
+    File *f = open(path, "r");
+    if (f == nullptr) {
+        return false;
+    }
+
+    size_t fileSize = f->getSize();
+    f->close();
+
+    // Create a buffer
+    byte *buffer = new byte[fileSize];
+    if (buffer == nullptr) {
+        return false;
+    }
+
+    // Load the data
+    if (slurp(path, buffer, fileSize) != fileSize) {
+        delete[] buffer;
+        return false;
+    }
+
+    // Convert to string
+    result = std::string(reinterpret_cast<const char *>(buffer), fileSize);
+
+    delete[] buffer;
+
+    return true;
+}
+
+size_t Sandbox::slurp(Path path, byte *buffer, size_t size) {
+    if (!path.isValid()) {
+        return 0;
+    }
+
+    File *file = open(path, "rb");
+    if (file == nullptr) {
+        return 0;
+    }
+
+    size_t bytesRead = 0;
+    size_t readNow = 1;
+
+    while (bytesRead < size && readNow != 0) {
+        readNow = file->read(buffer + bytesRead, 1, size - bytesRead);
+        bytesRead += readNow;
+    }
+
+    file->close();
+
+    // Not finished the file
+    if (bytesRead != size) {
+        return 0;
+    }
+
+    return bytesRead;
+}
+
 #pragma mark - File
 
 File::File(std::string path, std::string mode) {
@@ -281,26 +345,28 @@ File::~File() {
 void File::close() {
     assert(rwOps != nullptr);
 
-    SDL_RWclose(rwOps);
+    SDL_RWclose((SDL_RWops *)rwOps);
     rwOps = nullptr;
+
+    delete this;
 }
 
 size_t File::seek(size_t offset, int whence) {
     assert(rwOps != nullptr);
 
-    return SDL_RWseek(rwOps, offset, whence);
+    return SDL_RWseek((SDL_RWops *)rwOps, offset, whence);
 }
 
 size_t File::getSize() {
     assert(rwOps != nullptr);
 
-    return SDL_RWsize(rwOps);
+    return SDL_RWsize((SDL_RWops *)rwOps);
 }
 
 size_t File::tell() {
     assert(rwOps != nullptr);
 
-    return SDL_RWtell(rwOps);
+    return SDL_RWtell((SDL_RWops *)rwOps);
 }
 
 size_t File::read(void *buffer, size_t size, size_t num) {
@@ -309,7 +375,7 @@ size_t File::read(void *buffer, size_t size, size_t num) {
     if (size == 0)
         return 0;
 
-    return SDL_RWread(rwOps, buffer, size, num);
+    return SDL_RWread((SDL_RWops *)rwOps, buffer, size, num);
 }
 
 size_t File::write(const void *buffer, size_t size, size_t num) {
@@ -318,7 +384,7 @@ size_t File::write(const void *buffer, size_t size, size_t num) {
     if (size == 0)
         return 0;
 
-    return SDL_RWwrite(rwOps, buffer, size, num);
+    return SDL_RWwrite((SDL_RWops *)rwOps, buffer, size, num);
 }
 
 void File::puts(std::string str) {

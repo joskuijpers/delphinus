@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include <SDL2/SDL_rwops.h>
+#include "types.hpp"
 
 namespace delphinus {
 
@@ -31,10 +31,11 @@ class Path {
     friend Sandbox;
     
     std::vector<std::string> elements;
-public:
     path_type_t type = INVALID;
+    std::string error;
 
 public:
+    Path();
     Path(std::string base_dir, std::string name);
     Path(Path base_dir, std::string path);
     Path(std::string path);
@@ -46,6 +47,14 @@ public:
 
     inline bool isRoot() {
         return elements.size() == 0 && type != ABSOLUTE;
+    }
+
+    inline path_type_t getType() {
+        return type;
+    }
+
+    inline std::string getError() {
+        return error;
     }
 
     /**
@@ -62,7 +71,14 @@ public:
     std::string getBasename();
     Path getDirname();
 
-    // compare (== operator)
+
+    inline bool operator==(const Path& other) {
+        return type == other.type && elements == other.elements;
+    }
+
+    inline bool operator!=(const Path& other) {
+        return type != other.type || elements != other.elements;
+    }
 
 private:
     void constructPath(std::string path);
@@ -107,14 +123,6 @@ public:
      */
     bool isDirectory(Path path);
 
-//        std::string slurp(Path)
-//        byte *slurp(Path, out_size)
-//        spew(Path, buf, size)
-//        spew(Path, std::string)
-//        mkdir(Path)
-//        rmdir(Path)
-//        rename(Path, Path)
-
     class ListEntry {
         friend Sandbox;
 
@@ -128,16 +136,25 @@ public:
         inline Path getPath() { return path; }
     };
 
+    /**
+     * Get a list of entries at given path.
+     */
     std::vector<ListEntry> list(Path path);
 
-private:
-//        resolve(Path) // resolve Sandboxed path to real path
+    bool slurp(Path path, std::string& result);
+    size_t slurp(Path path, byte *buffer, size_t size);
+
+    //        spew(Path, buf, size)
+    //        spew(Path, std::string)
+    //        mkdir(Path)
+    //        rmdir(Path)
+    //        rename(Path, Path)
 };
 
 class File {
     friend Sandbox;
 
-    SDL_RWops *rwOps;
+    void *rwOps;
 
     File(std::string path, std::string mode);
     ~File();

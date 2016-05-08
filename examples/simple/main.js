@@ -12,6 +12,7 @@ tryModule("./foo"); // folder with index file
 tryModule("./foo/bar"); // folder with other file
 
 require("./foo"); // More tests
+require("link");
 
 function tryModule(m) {
     try {
