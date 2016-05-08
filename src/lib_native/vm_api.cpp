@@ -11,6 +11,8 @@
 #include "util.hpp"
 #include "macros.hpp"
 
+#include <SDL2/SDL.h>
+
 bool api_new_vm(JSContext *context, uint argc, JS::Value *vp) {
     return true;
 }
@@ -47,13 +49,35 @@ bool api_vm_print(JSContext *context, uint argc, JS::Value *vp) {
 
         JS_free(context, value);
     }
-    
+
+    return true;
+}
+
+bool api_do_events(JSContext *context, uint argc, JS::Value *vp) {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+//        printEvent(&event);
+
+        if (event.type == SDL_QUIT) {
+            printf("Quit!\n");
+            args.rval().setNumber((double)-1);
+            return true;
+        }
+
+        // Add event to array
+    }
+
+    // Return array
+    args.rval().setUndefined();
     return true;
 }
 
 static const JSFunctionSpec vmFunctions[] = {
     JS_FS("get_extensions", api_vm_get_extensions, 1, 0),
     JS_FS("print", api_vm_print, 1, 0),
+    JS_FS("do_events", api_do_events, 0, 0),
     JS_FS_END
 };
 

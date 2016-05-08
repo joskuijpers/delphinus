@@ -1,27 +1,30 @@
-//let x = require("./test");
-
-//const assert = require("assert");
-//assert(5,1+4,"Samething");
-
-tryModule("./test"); // without extension
-tryModule("./test.js"); // with extension
-tryModule("../test"); // sub folder (fails here)
-tryModule("assert"); // system module
-tryModule("link"); // package
-tryModule("./foo"); // folder with index file
-tryModule("./foo/bar"); // folder with other file
-
 require("./foo"); // More tests
-require("link");
+const link = require("link");
 
-function tryModule(m) {
-    try {
-        console.log(`${m} => `, require.resolve(m));
-    } catch (e) {
-        console.log(e.message);
-    }
-}
+exports.test = "hello";
+console.log("exports '",exports,"', '",module,"'");
+
+module.exports = { "foo": "bar" };
+console.log("exports '",exports,"', '",module,"'");
 
 
-//console.log("Added 1 and 2: " + x.foo(1,2));
+let x = require("./test");
+
+console.log("Added 1 and 2: " + x.foo(1,2));
 console.log("The extensions: %s", engine.extensions);
+
+
+/*
+let running = true;
+while (running) {
+    // Handle events
+    let events = __delphinus.do_events();
+
+    if (events == -1) {
+        running = false;
+        break;
+    }
+
+    // Flip screen
+}
+*/

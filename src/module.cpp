@@ -174,8 +174,7 @@ bool Module::loadIntoRuntime() {
     }
 
     // Add exports and module properties
-    exports = JS_NewPlainObject(context);
-    JS::RootedObject rtExports(context, exports);
+    JS::RootedObject rtExports(context, JS_NewPlainObject(context));
     if (!JS_DefineProperty(context, moduleScope,
                            "exports", rtExports,
                            JSPROP_ENREPE)) {
@@ -201,6 +200,12 @@ bool Module::loadIntoRuntime() {
 
     // Add module reference to this
     JS_SetPrivate(moduleObj.get(), (void *)this);
+
+    // Add 'module.exports'
+    if (!JS_DefineProperty(context, moduleObj, "exports", rtExports, JSPROP_ENUMERATE | JSPROP_PERMANENT)) {
+        LOG("Failed to define 'module.exports'");
+        return false;
+    }
 
     // Add 'module.id'
     DPH_JS_STRING(moduleId, name.c_str());
@@ -234,7 +239,26 @@ bool Module::loadIntoRuntime() {
     script = rtScript;
 
     JS::RootedValue rval(context);
-    return JS_ExecuteScript(context, rtScript, &rval);
+    if (!JS_ExecuteScript(context, rtScript, &rval)) {
+        return false;
+    }
+
+    // Extract the exports, it may be overridden
+    JS::RootedValue newExports(context);
+    if (!JS_GetProperty(context, moduleObj, "exports", &newExports)) {
+        LOG("Failed to retrieve exports");
+        return false;
+    }
+
+    // Transform to an object and store it in the module
+    JS::RootedObject finalExports(context);
+    if (!JS_ValueToObject(context, newExports, &finalExports)) {
+        LOG("Could not transform value to object");
+        return false;
+    }
+    exports = finalExports;
+
+    return true;
 }
 
 #pragma mark - Memory management
