@@ -39,7 +39,6 @@ public:
     std::string getModuleId();
 private:
     static void module_trace_func(JSTracer *tracer, void *data);
-    std::string getScriptPath();
     bool addGlobals(JSContext *context, JS::HandleObject moduleScope);
 };
 

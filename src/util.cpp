@@ -18,21 +18,6 @@
 #include <js/Conversions.h>
 #include <SDL2/SDL.h>
 
-bool readFile(std::string path, std::string &contents) {
-    std::stringstream buffer;
-    std::ifstream file(path);
-
-    if (!file) {
-        LOG("Could not load script %s", path.c_str());
-        return false;
-    }
-
-    buffer << file.rdbuf();
-    contents = buffer.str();
-
-    return true;
-}
-
 std::string stringFromValue(JSContext *context, JS::HandleValue value) {
     if (!value.isString())
         return nullptr;

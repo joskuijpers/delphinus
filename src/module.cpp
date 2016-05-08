@@ -50,10 +50,6 @@ Module::~Module() {
     JS_RemoveExtraGCRootsTracer(runtime->runtime, module_trace_func, this);
 }
 
-std::string Module::getScriptPath() {
-    return runtime->sandbox->resolve(Path(name));
-}
-
 std::string Module::getModuleId() {
     return name;
 }
@@ -217,10 +213,10 @@ bool Module::loadIntoRuntime() {
 
 #pragma mark - Load and run script
     // Load script data from
-    std::string path = getScriptPath();
     std::string scriptContents;
-    if (!readFile(path, scriptContents))
+    if (!runtime->getSandbox()->slurp(name, scriptContents)) {
         return false;
+    }
 
     JS::OwningCompileOptions options(context);
     options.setFileAndLine(context, name.c_str(), 1);
