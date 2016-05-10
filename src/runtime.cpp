@@ -15,10 +15,12 @@
 
 #include <SDL2/SDL_filesystem.h>
 
+using namespace delphinus;
+
 /// Error reporting callback for SpiderMonkey.
 static void reportError(JSContext *cx, const char *message, JSErrorReport *report);
 
-delphinus::Runtime::Runtime() {
+Runtime::Runtime() {
     // Initialize the JS engine
     JS_Init();
 
@@ -42,9 +44,9 @@ delphinus::Runtime::Runtime() {
     sandbox = new Sandbox();
 }
 
-delphinus::Runtime::~Runtime() {
+Runtime::~Runtime() {
     delete sandbox;
-    delphinus::moduleCache_dispose();
+    moduleCache_dispose();
 
     JS_DestroyContextNoGC(context);
     JS_DestroyRuntime(runtime);
@@ -52,11 +54,11 @@ delphinus::Runtime::~Runtime() {
     JS_ShutDown();
 }
 
-delphinus::Runtime *delphinus::Runtime::getCurrent(JSContext *context) {
-    return (delphinus::Runtime *)JS_GetRuntimePrivate(JS_GetRuntime(context));
+Runtime *Runtime::getCurrent(JSContext *context) {
+    return (Runtime *)JS_GetRuntimePrivate(JS_GetRuntime(context));
 }
 
-void delphinus::Runtime::run() {
+void Runtime::run() {
     /*std::vector<Path> paths;
 
     paths.push_back(Path("tools.js"));
@@ -94,9 +96,18 @@ void delphinus::Runtime::run() {
     delete mainModule;
 }
 
-static void reportError(JSContext *cx, const char *message, JSErrorReport *report) {
+static bool printStackTrace(JSContext *context, JS::HandleObject stracktrace) {
+
+    return true;
+}
+
+static void reportError(JSContext *context, const char *message, JSErrorReport *report) {
     const char *filename = report->filename ? report->filename : "<no filename>";
     const char *errorType = "Error";
+
+    if (!report) {
+        fprintf(stderr, "JS error from unknown source: %s\n", message);
+    }
 
     if (JSREPORT_IS_STRICT_MODE_ERROR(report->flags)) {
         errorType = "StrictError";
@@ -106,5 +117,22 @@ static void reportError(JSContext *cx, const char *message, JSErrorReport *repor
         errorType = "Exception";
     }
 
-    LOG("%s in %s:%u: %s", errorType, filename, (uint)report->lineno, message);
+    fprintf(stderr, "%s in %s:%u:%u %s\n", errorType, filename, (uint)report->lineno, (uint)report->column, message);
+
+    if (JS_IsExceptionPending(context)) {
+        JS::RootedValue excValue(context);
+
+        JS_GetPendingException(context, &excValue); 
+
+        if (!excValue.isUndefined()) {
+            JS::RootedObject excObject(context);
+            if (!JS_ValueToObject(context, excValue, &excObject)) {
+                return;
+            }
+
+            LOG("Get stacktrace");
+            JS::RootedObject stacktrace(context, ExceptionStackOrNull(context, excObject));
+            printStackTrace(context, stacktrace);
+        }
+    }
 }

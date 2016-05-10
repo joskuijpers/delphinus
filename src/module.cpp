@@ -236,10 +236,8 @@ bool Module::loadIntoRuntime() {
                      strlen(scriptContents.c_str()), &rtScript)) {
         return false;
     }
-    script = rtScript;
 
-    JS::RootedValue rval(context);
-    if (!JS_ExecuteScript(context, rtScript, &rval)) {
+    if (!JS_ExecuteScript(context, rtScript)) {
         return false;
     }
 
@@ -268,7 +266,6 @@ void Module::module_trace_func(JSTracer *tracer, void *data) {
 
     if (mod->exports) JS_CallObjectTracer(tracer, &(mod->exports), "exports");
     if (mod->scope) JS_CallObjectTracer(tracer, &(mod->scope), "scope");
-    if (mod->script) JS_CallScriptTracer(tracer, &(mod->script), "script");
 }
 
 #pragma mark - Resolver

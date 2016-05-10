@@ -25,7 +25,6 @@ class Module : public std::enable_shared_from_this<Module> {
 
     JS::Heap<JSObject *> exports;
     JS::Heap<JSObject *> scope;
-    JS::Heap<JSScript *> script;
 
     Runtime *runtime;
 
